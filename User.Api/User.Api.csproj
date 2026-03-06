@@ -19,8 +19,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="CQRS\QueryHandler\" />
+    <Folder Include="CQRS\Query\" />
     <Folder Include="DbConnection\" />
     <Folder Include="DbEntities\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibraryService.Utility.Data.Core\LibraryService.Utility.Data.Core.csproj" />
   </ItemGroup>
 
 </Project>
