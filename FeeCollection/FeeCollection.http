@@ -1,0 +1,6 @@
+@FeeCollection_HostAddress = http://localhost:5062
+
+GET {{FeeCollection_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

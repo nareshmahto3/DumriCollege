@@ -1,0 +1,39 @@
+# Build outputs
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+
+# Rider
+.idea/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+
+# Publish folder
+publish/
+
+# NuGet
+*.nupkg
+packages/
+
+# Test results
+TestResults/
+
+# Coverage
+coverage/
