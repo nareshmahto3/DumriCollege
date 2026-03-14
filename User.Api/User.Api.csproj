@@ -19,8 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CQRS\QueryHandler\" />
-    <Folder Include="CQRS\Query\" />
     <Folder Include="DbConnection\" />
     <Folder Include="DbEntities\" />
   </ItemGroup>
