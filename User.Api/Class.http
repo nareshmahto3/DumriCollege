@@ -1,0 +1,27 @@
+### Class API Endpoints
+
+@baseUrl = https://localhost:7001/api/Class
+
+### Add New Class
+POST {{baseUrl}}
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "className": "Grade 10",
+  "section": "A",
+  "classTeacherId": 1,
+  "roomNumber": "101",
+  "capacity": 40,
+  "academicYear": "2025-2026",
+  "startDate": "2025-06-01",
+  "subjects": "Mathematics, Science, English, Social Studies"
+}
+
+### Get All Classes
+GET {{baseUrl}}
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get Class By ID
+GET {{baseUrl}}/1
+Authorization: Bearer YOUR_TOKEN_HERE

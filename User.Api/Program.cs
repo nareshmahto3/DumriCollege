@@ -19,8 +19,9 @@ builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JWT:Jwt
 builder.Services.AddControllers();
 builder.Services.AddDbContext<DumriCommerceCollegeContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AdmissionDbConn")));
-// Register your repository 
+// Register your repository
 builder.Services.AddScoped<IRepository<MRole>, RoleRepository>();
+builder.Services.AddScoped<IRepository<User.Api.DbEntities.Class>, ClassRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork<DumriCommerceCollegeContext>>();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 builder.Services.AddEndpointsApiExplorer();
