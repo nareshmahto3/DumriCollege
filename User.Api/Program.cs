@@ -22,6 +22,7 @@ builder.Services.AddDbContext<DumriCommerceCollegeContext>(options =>
 // Register your repository
 builder.Services.AddScoped<IRepository<MRole>, RoleRepository>();
 builder.Services.AddScoped<IRepository<User.Api.DbEntities.Class>, ClassRepository>();
+builder.Services.AddScoped<IRepository<User.Api.DbEntities.Subject>, SubjectRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork<DumriCommerceCollegeContext>>();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 builder.Services.AddEndpointsApiExplorer();

@@ -1,0 +1,26 @@
+### Subject API Endpoints
+
+@baseUrl = https://localhost:7001/api/Subject
+
+### Add New Subject
+POST {{baseUrl}}
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "subjectName": "Mathematics",
+  "subjectCode": "MATH101",
+  "classId": 1,
+  "teacherId": 1,
+  "credits": 4,
+  "type": "core",
+  "description": "Introduction to Mathematics covering algebra, geometry, and calculus basics."
+}
+
+### Get All Subjects
+GET {{baseUrl}}
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get Subject By ID
+GET {{baseUrl}}/1
+Authorization: Bearer YOUR_TOKEN_HERE
