@@ -1,0 +1,75 @@
+### Teacher API Endpoints
+
+@baseUrl = https://localhost:7001/api/Teacher
+
+### Add New Teacher
+POST {{baseUrl}}
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "employeeId": "45545454",
+  "firstName": "Shyam",
+  "lastName": "Barua",
+  "email": "shyambarua2003@gmail.com",
+  "phone": "09045700873",
+  "dateOfBirth": "2026-03-10",
+  "gender": "male",
+  "qualification": "ba",
+  "designation": "assistant",
+  "department": "social",
+  "joiningDate": "2026-03-19",
+  "experience": "",
+  "salary": null,
+  "address": "Maruti City",
+  "city": "Agra",
+  "state": "uttar-pradesh",
+  "zipCode": "282001",
+  "bloodGroup": "A+",
+  "religion": "hinduism",
+  "emergencyContact": "05940958049",
+  "subjects": "",
+  "shortBio": ""
+}
+
+### Get All Teachers
+GET {{baseUrl}}
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get Teacher By ID
+GET {{baseUrl}}/1
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Update Teacher
+PUT {{baseUrl}}/1
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "employeeId": "45545454",
+  "firstName": "Shyam",
+  "lastName": "Barua",
+  "email": "shyambarua2003@gmail.com",
+  "phone": "09045700873",
+  "dateOfBirth": "2026-03-10",
+  "gender": "male",
+  "qualification": "ba",
+  "designation": "assistant",
+  "department": "social",
+  "joiningDate": "2026-03-19",
+  "experience": "",
+  "salary": null,
+  "address": "Maruti City",
+  "city": "Agra",
+  "state": "uttar-pradesh",
+  "zipCode": "282001",
+  "bloodGroup": "A+",
+  "religion": "hinduism",
+  "emergencyContact": "05940958049",
+  "subjects": "",
+  "shortBio": ""
+}
+
+### Delete Teacher
+DELETE {{baseUrl}}/1
+Authorization: Bearer YOUR_TOKEN_HERE

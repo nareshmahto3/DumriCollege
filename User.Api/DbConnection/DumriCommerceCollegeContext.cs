@@ -24,8 +24,10 @@ public partial class DumriCommerceCollegeContext : DbContext
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
+    public virtual DbSet<Teacher> Teachers { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+// #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=NARESH;Database=DumriCommerceCollege;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -61,6 +63,38 @@ public partial class DumriCommerceCollegeContext : DbContext
         modelBuilder.Entity<UserRole>(entity =>
         {
             entity.ToTable("UserRole");
+        });
+
+        modelBuilder.Entity<Teacher>(entity =>
+        {
+            entity.ToTable("Teacher");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.EmployeeId).HasMaxLength(50);
+            entity.Property(e => e.FirstName).HasMaxLength(100);
+            entity.Property(e => e.LastName).HasMaxLength(100);
+            entity.Property(e => e.Email).HasMaxLength(150);
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.Gender).HasMaxLength(10);
+            entity.Property(e => e.Qualification).HasMaxLength(100);
+            entity.Property(e => e.Designation).HasMaxLength(100);
+            entity.Property(e => e.Department).HasMaxLength(100);
+            entity.Property(e => e.Experience).HasMaxLength(100);
+            entity.Property(e => e.Salary).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.Address).HasMaxLength(250);
+            entity.Property(e => e.City).HasMaxLength(100);
+            entity.Property(e => e.State).HasMaxLength(100);
+            entity.Property(e => e.ZipCode).HasMaxLength(10);
+            entity.Property(e => e.BloodGroup).HasMaxLength(10);
+            entity.Property(e => e.Religion).HasMaxLength(50);
+            entity.Property(e => e.EmergencyContact).HasMaxLength(20);
+            entity.Property(e => e.Subjects).HasMaxLength(500);
+            entity.Property(e => e.ShortBio).HasMaxLength(500);
+            entity.Property(e => e.DateOfBirth).HasColumnType("date");
+            entity.Property(e => e.JoiningDate).HasColumnType("date");
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
         });
 
         OnModelCreatingPartial(modelBuilder);
