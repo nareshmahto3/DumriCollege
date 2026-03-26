@@ -1,8 +1,14 @@
 <Solution>
   <Project Path="Admission.Api/Admission.Api.csproj" />
   <Project Path="ApiGateway/ApiGateway.csproj" />
-  <Project Path="LibraryService.Utility.Data.Core/LibraryService.Utility.Data.Core.csproj" />
-  <Project Path="Student.Api/Student.Api.csproj" />
+  <Project Path="college_user/college_user.csproj" Id="8371c39e-95cf-4892-b981-84a1829d0365" />
+  <Project Path="Employee.Api/Employee.Api.csproj" Id="cee520bc-f1dc-4f64-acdb-20d260fc119e" />
   <Project Path="FeeCollection/FeeCollection.csproj" Id="95488e5d-406d-411f-ac7e-6b2768db5ab1" />
+  <Project Path="Frontend.Api/Frontend.Api.csproj" Id="49d72157-6094-4c97-b7d9-41b1480e9356" />
+  <Project Path="LibraryService.Utility.Data.Core/LibraryService.Utility.Data.Core.csproj" />
+  <Project Path="Login.Api/Login.Api.csproj" Id="d124f0e4-bbfa-4c76-a455-1666c94f4d6f" />
+  <Project Path="Master.Api/Master.Api.csproj" Id="f7b85b87-fd20-4123-95e4-e452fc4a070b" />
+  <Project Path="Section.Api/Section.Api.csproj" Id="7f0fa4a6-cbcb-46ce-adbc-620a7bd90e71" />
+  <Project Path="Student.Api/Student.Api.csproj" />
   <Project Path="User.Api/User.Api.csproj" Id="0415e98c-5d80-47a8-b5d2-68596da7e4a2" />
 </Solution>

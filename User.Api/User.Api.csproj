@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="MediatR" Version="14.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.2">
       <PrivateAssets>all</PrivateAssets>
@@ -21,6 +21,11 @@
   <ItemGroup>
     <Folder Include="DbConnection\" />
     <Folder Include="DbEntities\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Employee.Api\Employee.Api.csproj" />
+    <ProjectReference Include="..\LibraryService.Utility.Data.Core\LibraryService.Utility.Data.Core.csproj" />
   </ItemGroup>
 
 </Project>
