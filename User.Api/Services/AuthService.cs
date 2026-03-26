@@ -30,7 +30,7 @@ namespace User.Api.Services
             var user = await (
                             from u in _context.Users
                             join ur in _context.UserRoles on u.Id equals ur.UserId
-                            join r in _context.Roles on ur.RoleId equals r.Id
+                            join r in _context.MRoles on ur.RoleId equals r.RoleId
                             where u.Email == model.Email
                             select u
                         ).FirstOrDefaultAsync();
@@ -72,9 +72,9 @@ namespace User.Api.Services
                             var roles = (
                                             from u in _context.Users
                                             join ur in _context.UserRoles on u.Id equals ur.UserId
-                                            join r in _context.Roles on ur.RoleId equals r.Id
+                                            join r in _context.MRoles on ur.RoleId equals r.RoleId
                                             where u.Email == user.Email
-                                            select r.Name
+                                            select r.RoleName
                                         ).ToList();
             authClaims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 

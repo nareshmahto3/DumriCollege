@@ -5,10 +5,8 @@ using MediatR;
 
 namespace Admission.Api.CQRS.AddAdmission
 {
-    public class AddAdmissionCommandHandler
-    {
-    }
-    public class AddProductCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<AddAdmissionCommand, ResponseDto>
+   
+    public class AddAdmissionCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<AddAdmissionCommand, ResponseDto>
     {
         public async Task<ResponseDto> Handle(AddAdmissionCommand request, CancellationToken cancellationToken)
         {
