@@ -42,6 +42,29 @@ namespace User.Api.Controllers
         }
 
         /// <summary>
+        /// Add a new teacher with photo (multipart form)
+        /// </summary>
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("AddWithPhoto")]
+        public async Task<IActionResult> AddTeacherWithPhoto([FromForm] AddTeacherFormDto teacherFormDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var command = new AddTeacherFormCommand(teacherFormDto);
+            var result = await _mediator.Send(command);
+
+            if (!result.IsSuccess)
+                return BadRequest(result);
+
+            return CreatedAtAction(nameof(GetTeacherById), new { id = result.Data }, result);
+        }
+
+        /// <summary>
         /// Get teacher by ID
         /// </summary>
         [ProducesResponseType(StatusCodes.Status200OK)]

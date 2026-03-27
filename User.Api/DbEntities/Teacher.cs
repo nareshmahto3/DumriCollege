@@ -51,6 +51,8 @@ public partial class Teacher
 
     public string? ShortBio { get; set; }
 
+    public string? PhotoPath { get; set; }
+
     public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;

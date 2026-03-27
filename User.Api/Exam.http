@@ -1,0 +1,107 @@
+### Exam API Endpoints
+
+@baseUrl = https://localhost:7001/api/Exam
+
+### Schedule New Exam
+POST {{baseUrl}}
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "examName": "First Terminal Examination 2026",
+  "examType": "terminal",
+  "class": "10",
+  "academicYear": "2025-2026",
+  "startDate": "2026-03-15",
+  "endDate": "2026-03-20",
+  "venue": "Main Examination Hall",
+  "instructions": "Students must bring their admit cards and arrive 30 minutes before the exam time.",
+  "examSubjects": [
+    {
+      "subject": "mathematics",
+      "date": "2026-03-15",
+      "startTime": "09:00:00",
+      "endTime": "12:00:00",
+      "maxMarks": 100
+    },
+    {
+      "subject": "science",
+      "date": "2026-03-16",
+      "startTime": "09:00:00",
+      "endTime": "12:00:00",
+      "maxMarks": 100
+    },
+    {
+      "subject": "english",
+      "date": "2026-03-17",
+      "startTime": "09:00:00",
+      "endTime": "12:00:00",
+      "maxMarks": 100
+    }
+  ]
+}
+
+### Get All Exams
+GET {{baseUrl}}
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get All Exams with Filters
+GET {{baseUrl}}?pageNumber=1&pageSize=10&classFilter=10&academicYear=2025-2026
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get Exam By ID
+GET {{baseUrl}}/1
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Update Exam
+PUT {{baseUrl}}/1
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "examName": "First Terminal Examination 2026 - Updated",
+  "examType": "terminal",
+  "class": "10",
+  "academicYear": "2025-2026",
+  "startDate": "2026-03-15",
+  "endDate": "2026-03-20",
+  "venue": "Main Examination Hall - Room A",
+  "instructions": "Updated instructions: Students must bring their admit cards and arrive 30 minutes before the exam time. No electronic devices allowed.",
+  "examSubjects": [
+    {
+      "id": 1,
+      "subject": "mathematics",
+      "date": "2026-03-15",
+      "startTime": "09:00:00",
+      "endTime": "12:00:00",
+      "maxMarks": 100
+    },
+    {
+      "id": 2,
+      "subject": "science",
+      "date": "2026-03-16",
+      "startTime": "09:00:00",
+      "endTime": "12:00:00",
+      "maxMarks": 100
+    },
+    {
+      "id": 3,
+      "subject": "english",
+      "date": "2026-03-17",
+      "startTime": "09:00:00",
+      "endTime": "12:00:00",
+      "maxMarks": 100
+    },
+    {
+      "subject": "hindi",
+      "date": "2026-03-18",
+      "startTime": "09:00:00",
+      "endTime": "12:00:00",
+      "maxMarks": 100
+    }
+  ]
+}
+
+### Delete Exam
+DELETE {{baseUrl}}/1
+Authorization: Bearer YOUR_TOKEN_HERE
