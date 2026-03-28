@@ -40,11 +40,9 @@ public partial class StudentDbContext : DbContext
 
     public virtual DbSet<StudentApplication> StudentApplications { get; set; }
 
-    public virtual DbSet<StudentApplicationIssue> StudentApplicationIssues { get; set; }
-
-    public virtual DbSet<StudentApplicationReview> StudentApplicationReviews { get; set; }
-
     public virtual DbSet<StudentCertificate> StudentCertificates { get; set; }
+
+    public virtual DbSet<StudentDocumentVerification> StudentDocumentVerifications { get; set; }
 
     public virtual DbSet<StudentExamDetail> StudentExamDetails { get; set; }
 
@@ -192,43 +190,6 @@ public partial class StudentDbContext : DbContext
                 .HasConstraintName("FK_StudentApplication_Religions");
         });
 
-        modelBuilder.Entity<StudentApplicationIssue>(entity =>
-        {
-            entity.HasKey(e => e.IssueId).HasName("PK__StudentA__6C861604242C4395");
-
-            entity.ToTable("StudentApplicationIssue");
-
-            entity.Property(e => e.CreatedDate)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.FieldName).HasMaxLength(100);
-            entity.Property(e => e.Status)
-                .HasMaxLength(50)
-                .HasDefaultValue("Pending");
-
-            entity.HasOne(d => d.Application).WithMany(p => p.StudentApplicationIssues)
-                .HasForeignKey(d => d.ApplicationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_StudentApplicationIssue_Application");
-        });
-
-        modelBuilder.Entity<StudentApplicationReview>(entity =>
-        {
-            entity.HasKey(e => e.ReviewId).HasName("PK__StudentA__74BC79CE15050037");
-
-            entity.ToTable("StudentApplicationReview");
-
-            entity.Property(e => e.CreatedDate)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.Status).HasMaxLength(50);
-
-            entity.HasOne(d => d.Application).WithMany(p => p.StudentApplicationReviews)
-                .HasForeignKey(d => d.ApplicationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_StudentApplicationReview_Application");
-        });
-
         modelBuilder.Entity<StudentCertificate>(entity =>
         {
             entity.HasKey(e => e.CertificateId).HasName("PK__StudentC__BBF8A7C16344AFBE");
@@ -244,6 +205,35 @@ public partial class StudentDbContext : DbContext
             entity.HasOne(d => d.Application).WithMany(p => p.StudentCertificates)
                 .HasForeignKey(d => d.ApplicationId)
                 .HasConstraintName("FK__StudentCe__Appli__52593CB8");
+        });
+
+        modelBuilder.Entity<StudentDocumentVerification>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__StudentD__3214EC0772E1BE93");
+
+            entity.ToTable("StudentDocumentVerification");
+
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.DocumentType).HasMaxLength(100);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.RejectReason).HasMaxLength(500);
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValue("Pending");
+            entity.Property(e => e.VerifiedDate).HasColumnType("datetime");
+            entity.Property(e => e.Version).HasDefaultValue(1);
+
+            entity.HasOne(d => d.Application).WithMany(p => p.StudentDocumentVerifications)
+                .HasForeignKey(d => d.ApplicationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__StudentDo__Appli__2180FB33");
+
+            entity.HasOne(d => d.Certificate).WithMany(p => p.StudentDocumentVerifications)
+                .HasForeignKey(d => d.CertificateId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__StudentDo__Certi__208CD6FA");
         });
 
         modelBuilder.Entity<StudentExamDetail>(entity =>

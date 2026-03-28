@@ -63,11 +63,9 @@ public partial class StudentApplication
 
     public virtual Religion? Religion { get; set; }
 
-    public virtual ICollection<StudentApplicationIssue> StudentApplicationIssues { get; set; } = new List<StudentApplicationIssue>();
-
-    public virtual ICollection<StudentApplicationReview> StudentApplicationReviews { get; set; } = new List<StudentApplicationReview>();
-
     public virtual ICollection<StudentCertificate> StudentCertificates { get; set; } = new List<StudentCertificate>();
+
+    public virtual ICollection<StudentDocumentVerification> StudentDocumentVerifications { get; set; } = new List<StudentDocumentVerification>();
 
     public virtual ICollection<StudentExamDetail> StudentExamDetails { get; set; } = new List<StudentExamDetail>();
 

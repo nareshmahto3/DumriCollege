@@ -232,15 +232,16 @@ namespace Students.Api.CORS.RegisterStudent
                 }
             }
 
-            // 7) StudentCertificate — save multiple certificate records
+            // 7) StudentCertificate + StudentDocumentVerification — save and create pending verification
             var certRepo = _unitOfWork.Repository<StudentCertificate>();
+            var verRepo = _unitOfWork.Repository<StudentDocumentVerification>();
 
-            async Task SaveCertificate(string type, string? path)
+            async Task SaveCertificateWithVerification(string type, string? path)
             {
                 if (string.IsNullOrEmpty(path))
                     return;
 
-                await certRepo.AddAsync(new StudentCertificate
+                var certificate = new StudentCertificate
                 {
                     ApplicationId = application.ApplicationId,
                     CertificateType = type,
@@ -249,15 +250,33 @@ namespace Students.Api.CORS.RegisterStudent
                     IssuedBy = dto.IssuedBy,
                     FilePath = path,
                     CreatedDate = DateTime.Now
-                });
+                };
+
+                await certRepo.AddAsync(certificate);
+                await _unitOfWork.SaveChangesAsync(); // ensure CertificateId is set
+
+                var verification = new StudentDocumentVerification
+                {
+                    ApplicationId = application.ApplicationId,
+                    CertificateId = certificate.CertificateId,
+                    DocumentType = type,
+                    Status = "Pending",
+                    RejectReason = null,
+                    IsActive = true,
+                    Version = 1,
+                    VerifiedDate = null,
+                    CreatedDate = DateTime.Now
+                };
+
+                await verRepo.AddAsync(verification);
             }
 
-            await SaveCertificate("Caste Certificate", casteResult.SavedPath);
-            await SaveCertificate("School Leaving Certificate", slcResult.SavedPath);
-            await SaveCertificate("Admit Card", admitResult.SavedPath);
-            await SaveCertificate("Marksheet", marksheetResult.SavedPath);
-            await SaveCertificate("Aadhaar Card", aadhaarResult.SavedPath);
-            await SaveCertificate("Profile Photo", photoResult.SavedPath);
+            await SaveCertificateWithVerification("Caste Certificate", casteResult.SavedPath);
+            await SaveCertificateWithVerification("School Leaving Certificate", slcResult.SavedPath);
+            await SaveCertificateWithVerification("Admit Card", admitResult.SavedPath);
+            await SaveCertificateWithVerification("Marksheet", marksheetResult.SavedPath);
+            await SaveCertificateWithVerification("Aadhaar Card", aadhaarResult.SavedPath);
+            await SaveCertificateWithVerification("Profile Photo", photoResult.SavedPath);
 
             await _unitOfWork.SaveChangesAsync();
 

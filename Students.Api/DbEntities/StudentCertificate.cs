@@ -22,4 +22,6 @@ public partial class StudentCertificate
     public DateTime? CreatedDate { get; set; }
 
     public virtual StudentApplication? Application { get; set; }
+
+    public virtual ICollection<StudentDocumentVerification> StudentDocumentVerifications { get; set; } = new List<StudentDocumentVerification>();
 }
