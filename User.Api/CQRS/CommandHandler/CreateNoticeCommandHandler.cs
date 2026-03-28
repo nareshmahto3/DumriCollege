@@ -4,6 +4,7 @@ using User.Api.CQRS.Command;
 using User.Api.DbEntities;
 using User.Api.DTOs;
 using User.Api.Infrastructures;
+using LibraryService.Utility.Data.Core.Interfaces;
 
 namespace User.Api.CQRS.CommandHandler
 {

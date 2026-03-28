@@ -1,4 +1,5 @@
 using MediatR;
+using User.Api.DTOs;
 
 namespace User.Api.CQRS.Command
 {

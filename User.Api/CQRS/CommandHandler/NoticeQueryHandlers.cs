@@ -1,8 +1,10 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using User.Api.CQRS.Command;
+using User.Api.DbEntities;
 using User.Api.DTOs;
 using User.Api.Infrastructures;
+using LibraryService.Utility.Data.Core.Interfaces;
 
 namespace User.Api.CQRS.CommandHandler
 {
@@ -76,8 +78,8 @@ namespace User.Api.CQRS.CommandHandler
         {
             try
             {
-                var notices = await _unitOfWork.Repository<Notice>().GetAllAsync();
-                var query = notices.Where(n => n.IsActive).AsQueryable();
+                var allNotices = await _unitOfWork.Repository<Notice>().GetAllAsync();
+                var query = allNotices.Where(n => n.IsActive).AsQueryable();
 
                 // Apply filters
                 if (!string.IsNullOrEmpty(request.SearchTerm))

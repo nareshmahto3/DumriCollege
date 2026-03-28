@@ -1,5 +1,8 @@
 using User.Api.DbEntities;
+using User.Api.DbConnection;
 using User.Api.Infrastructures;
+using LibraryService.Utility.Data.Core.Interfaces;
+using LibraryService.Utility.Data.Core.Repositories;
 
 namespace User.Api.Repositories
 {
@@ -8,7 +11,7 @@ namespace User.Api.Repositories
         // Add specific methods if needed
     }
 
-    public class NoticeRepository : Repository<Notice>, INoticeRepository
+    public class NoticeRepository : Repository<Notice, DumriCommerceCollegeContext>, INoticeRepository
     {
         public NoticeRepository(DumriCommerceCollegeContext context) : base(context)
         {
@@ -20,7 +23,7 @@ namespace User.Api.Repositories
         // Add specific methods if needed
     }
 
-    public class NoticeAttachmentRepository : Repository<NoticeAttachment>, INoticeAttachmentRepository
+    public class NoticeAttachmentRepository : Repository<NoticeAttachment, DumriCommerceCollegeContext>, INoticeAttachmentRepository
     {
         public NoticeAttachmentRepository(DumriCommerceCollegeContext context) : base(context)
         {
