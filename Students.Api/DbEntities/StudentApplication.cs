@@ -49,7 +49,9 @@ public partial class StudentApplication
 
     public string? RegistrationNo { get; set; }
 
-    public string? StudentId { get; set; }
+    public string? ApplicationNo { get; set; }
+
+    public string? ApplicationStatus { get; set; }
 
     public virtual BloodGroup? BloodGroup { get; set; }
 

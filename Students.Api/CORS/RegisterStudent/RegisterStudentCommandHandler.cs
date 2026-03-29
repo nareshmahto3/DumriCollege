@@ -129,27 +129,51 @@ namespace Students.Api.CORS.RegisterStudent
                 request.PhotoFile, "photos", maxFileSize, _env, cancellationToken);
             if (!photoResult.Ok) return ResponseDto.Fail(photoResult.Error!);
 
-            // 4) Generate unique RegistrationNo and create StudentApplication
+            // 4) Generate unique ApplicationNo and create StudentApplication
             var appRepo = _unitOfWork.Repository<StudentApplication>();
 
-            // simple per-day sequence: DUMRI-YYYYMMDD-0001
-            var today = DateTime.UtcNow.Date;
-            var todayPrefix = $"DUMRI-{today:yyyyMMdd}-";
+            // ApplicationNo format: AP{AdmissionYear}{Sequence}
+            // Example: AP2026001
+            var admissionYear = DateTime.UtcNow.Year;
 
+            // Load all applications once (you are already doing similar for other logic)
             var allApps = await appRepo.GetAllAsync();
-            var todayCount = allApps.Count(a =>
-                a.RegistrationNo != null &&
-                a.RegistrationNo.StartsWith(todayPrefix, StringComparison.OrdinalIgnoreCase));
 
-            var nextSeq = todayCount + 1;
-            var generatedRegNo = $"{todayPrefix}{nextSeq:D4}";
+            // Find max sequence for current year
+            // Assumes existing ApplicationNo starts with "AP{year}" and then 3-digit sequence
+            var yearPrefix = $"AP{admissionYear}";
+            var yearApps = allApps
+                .Where(a => a.ApplicationNo != null &&
+                            a.ApplicationNo.StartsWith(yearPrefix, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            int nextSequence = 1;
+            if (yearApps.Any())
+            {
+                // Extract numeric tail and get max; be defensive against bad data
+                var maxSeq = yearApps
+                    .Select(a =>
+                    {
+                        var tail = a.ApplicationNo!.Substring(yearPrefix.Length);
+                        return int.TryParse(tail, out var n) ? n : 0;
+                    })
+                    .Max();
+
+                nextSequence = maxSeq + 1;
+            }
+
+            var generatedAppNo = $"{yearPrefix}{nextSequence:D3}";
 
             var application = new StudentApplication
             {
                 StudentName = dto.StudentName,
                 FatherName = dto.FatherName,
                 MotherName = dto.MotherName,
-                RegistrationNo = generatedRegNo,
+
+                // Do NOT set RegistrationNo here
+                ApplicationNo = generatedAppNo,
+                ApplicationStatus = "Pending",
+
                 PermanentAddress = dto.PermanentAddress,
                 LocalAddress = dto.LocalAddress,
                 DateOfBirth = dob,
@@ -284,7 +308,8 @@ namespace Students.Api.CORS.RegisterStudent
                 new
                 {
                     application.ApplicationId,
-                    application.RegistrationNo,
+                    application.ApplicationNo,
+                    application.RegistrationNo, // will be null at this stage
                     dto.StudentName,
                     Faculty = faculty.FacultyName
                 },

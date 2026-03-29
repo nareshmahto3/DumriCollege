@@ -148,6 +148,8 @@ public partial class StudentDbContext : DbContext
             entity.ToTable("StudentApplication");
 
             entity.Property(e => e.AadhaarNumber).HasMaxLength(20);
+            entity.Property(e => e.ApplicationNo).HasMaxLength(50);
+            entity.Property(e => e.ApplicationStatus).HasMaxLength(20);
             entity.Property(e => e.CreatedDate)
                 .HasDefaultValueSql("(getdate())", "DF__StudentAp__Creat__4316F928")
                 .HasColumnType("datetime");
@@ -161,7 +163,6 @@ public partial class StudentDbContext : DbContext
             entity.Property(e => e.Nationality).HasMaxLength(50);
             entity.Property(e => e.PermanentAddress).HasMaxLength(300);
             entity.Property(e => e.RegistrationNo).HasMaxLength(50);
-            entity.Property(e => e.StudentId).HasMaxLength(50);
             entity.Property(e => e.StudentName).HasMaxLength(100);
             entity.Property(e => e.Weight).HasMaxLength(10);
 

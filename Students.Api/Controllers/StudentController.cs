@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Students.Api.CORS.GetApplicationPdf;
 using Students.Api.CORS.RegisterStudent;
 using Students.Api.CORS.Student;
 
@@ -33,6 +34,35 @@ namespace Students.Api.Controllers
         {
             var result = await _mediator.Send(new GetStudentByIdQuery(id));
             return result.IsSuccess ? Ok(result) : NotFound(result);
+        }
+
+        // GET: api/student/application-pdf/{applicationId}
+        [HttpGet("application-pdf/{applicationId:int}")]
+        public async Task<IActionResult> GetApplicationPdf(int applicationId)
+        {
+            // use MediatR query that you already have
+            var query = new GetApplicationPdfQuery(applicationId);
+
+            try
+            {
+                var pdfBytes = await _mediator.Send(query);
+
+                if (pdfBytes == null || pdfBytes.Length == 0)
+                    return NotFound("PDF could not be generated.");
+
+                // you can change file name if you want
+                var fileName = $"Application_{applicationId}.pdf";
+                return File(pdfBytes, "application/pdf", fileName);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // e.g. "Application not found."
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Error while generating PDF.");
+            }
         }
     }
 }
