@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Employee.Api\Employee.Api.csproj" />
     <ProjectReference Include="..\LibraryService.Utility.Data.Core\LibraryService.Utility.Data.Core.csproj" />
   </ItemGroup>
 

@@ -18,7 +18,9 @@ public partial class DumriCommerceCollegeContext : DbContext
 
     // ================= EXISTING TABLES =================
     public virtual DbSet<Admission> Admissions { get; set; }
-    public virtual DbSet<Role> Roles { get; set; }
+
+    public virtual DbSet<MRole> MRoles { get; set; }
+
     public virtual DbSet<User.Api.DbEntities.User> Users { get; set; }
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
@@ -45,10 +47,13 @@ public partial class DumriCommerceCollegeContext : DbContext
             entity.Property(e => e.Date).HasColumnType("datetime");
         });
 
-        modelBuilder.Entity<Role>(entity =>
+        modelBuilder.Entity<MRole>(entity =>
         {
-            entity.ToTable("Role");
-            entity.Property(e => e.Name).HasMaxLength(150);
+            entity.HasKey(e => e.RoleId);
+
+            entity.ToTable("M_Role");
+
+            entity.Property(e => e.RoleName).HasMaxLength(10);
         });
 
         modelBuilder.Entity<User.Api.DbEntities.User>(entity =>
@@ -57,6 +62,8 @@ public partial class DumriCommerceCollegeContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(150);
             entity.Property(e => e.Name).HasMaxLength(250);
             entity.Property(e => e.Password).HasMaxLength(50);
+            entity.Property(e => e.RefreshToken).HasMaxLength(250);
+            entity.Property(e => e.RefreshTokenExpiry).HasColumnType("datetime");
             entity.Property(e => e.UserId).HasMaxLength(150);
         });
 

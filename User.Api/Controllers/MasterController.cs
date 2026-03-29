@@ -1,10 +1,14 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 //using Employee.Api.Infrastructures;
 using User.Api.CQRS.Command;
+using User.Api.CQRS.Query;
+using User.Api.DTOs;
 
 namespace User.Api.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
     [Route("api/[controller]")]
     public class MasterController : ControllerBase
@@ -18,31 +22,14 @@ namespace User.Api.Controllers
         {
             _mediator = mediator;
         }
-
-        //public MasterController(EmployeeRepository repo, IMediator mediator)
-        //{
-        //    _repo = repo;
-        //    _mediator = mediator;
-        //}
-
-        // ✅ Normal API (without CQRS)
-        //[HttpGet("all-employees")]
-        //public async Task<IActionResult> GetEmployee()
-        //{
-        //    var data = await _repo.GetEmployee();
-        //    return Ok(data);
-        //}
-
-        // ✅ Dynamic Table API (CQRS)
-        [HttpGet("{tableName}")]
-        public async Task<IActionResult> GetTableData(string tableName)
         {
             if (string.IsNullOrWhiteSpace(tableName))
                 return BadRequest("Table name is required");
-
+           
             var result = await _mediator.Send(new MasterCommand(tableName));
 
             return Ok(result);
         }
+        #endregion
     }
 }

@@ -3,16 +3,13 @@
 //using LibraryService.Utility.Data.Core.Interfaces;
 //using MediatR;
 
-//namespace Admission.Api.CQRS.AddAdmission
-//{
-//    public class AddCourseCommandHandler(IUnitOfWork unitOfWork)
-//     : IRequestHandler<AddAdmissionCommand, ResponseDto>
-//    {
-//        public Task<ResponseDto> Handle(AddAdmissionCommand request, CancellationToken cancellationToken)
-//        {
-//            throw new NotImplementedException();
-//        }
-//    }
+namespace Admission.Api.CQRS.AddAdmission
+{
+   
+    public class AddAdmissionCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<AddAdmissionCommand, ResponseDto>
+    {
+        public async Task<ResponseDto> Handle(AddAdmissionCommand request, CancellationToken cancellationToken)
+        {
 
 //    public class AddProductCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<AddAdmissionCommand, ResponseDto>
 //    {

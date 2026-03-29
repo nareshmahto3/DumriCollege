@@ -1,0 +1,27 @@
+﻿using MediatR;
+using Students.Api.DTOs;
+
+namespace Students.Api.CORS.RegisterStudent
+{
+    public class RegisterStudentCommand : IRequest<ResponseDto>
+    {
+        public StudentRegistrationDto Registration { get; }
+
+        // Files
+        public IFormFile? CertificateFile { get; }
+        public IFormFile? AadhaarFile { get; }
+        public IFormFile? PhotoFile { get; }
+
+        public RegisterStudentCommand(
+            StudentRegistrationDto registration,
+            IFormFile? certificateFile,
+            IFormFile? aadhaarFile,
+            IFormFile? photoFile)
+        {
+            Registration = registration;
+            CertificateFile = certificateFile;
+            AadhaarFile = aadhaarFile;
+            PhotoFile = photoFile;
+        }
+    }
+}
