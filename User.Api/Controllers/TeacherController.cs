@@ -24,19 +24,18 @@ namespace User.Api.Controllers
         /// <summary>
         /// Add a new teacher
         /// </summary>
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [AllowAnonymous]
+        //[ProducesResponseType(StatusCodes.Status201Created)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        //[AllowAnonymous]
         [HttpPost]
         [Route("add-teacher")]
-        public async Task<IActionResult> AddTeacher()
-        {
-            AddTeacherModel teacherDto = new();
+        public async Task<IActionResult> AddTeacher([FromBody] AddTeacherModel teacher)
+        {          
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var command = new AddTeacherCommand(teacherDto);
+            var command = new AddTeacherCommand(teacher);
             var result = await _mediator.Send(command);
 
             if (!result.IsSuccess)

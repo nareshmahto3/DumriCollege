@@ -19,5 +19,5 @@ public partial class User
 
     public DateTime? Otpexpiry { get; set; }
 
-    public virtual Role1? Role { get; set; }
+    public virtual MRole? Role { get; set; }
 }

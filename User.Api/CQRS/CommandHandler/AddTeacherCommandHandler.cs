@@ -26,41 +26,40 @@ namespace User.Api.CQRS.CommandHandler
                 return ResponseDto.Fail("Phone is required");
 
             // Map DTO to Entity
-            //var teacher = new User.Api.DbEntities.Teacher
-            //{
-            //    EmployeeId = request.TeacherDto.EmployeeId,
-            //    FirstName = request.TeacherDto.FirstName,
-            //    LastName = request.TeacherDto.LastName,
-            //    Email = request.TeacherDto.Email,
-            //    Phone = request.TeacherDto.Phone,
-            //    DateOfBirth = request.TeacherDto.DateOfBirth,
-            //    Gender = request.TeacherDto.Gender,
-            //    Qualification = request.TeacherDto.Qualification,
-            //    Designation = request.TeacherDto.Designation,
-            //    Department = request.TeacherDto.Department,
-            //    JoiningDate = request.TeacherDto.JoiningDate,
-            //    Experience = request.TeacherDto.Experience,
-            //    Salary = request.TeacherDto.Salary,
-            //    Address = request.TeacherDto.Address,
-            //    City = request.TeacherDto.City,
-            //    State = request.TeacherDto.State,
-            //    ZipCode = request.TeacherDto.ZipCode,
-            //    BloodGroup = request.TeacherDto.BloodGroup,
-            //    Religion = request.TeacherDto.Religion,
-            //    EmergencyContact = request.TeacherDto.EmergencyContact,
-            //    Subjects = request.TeacherDto.Subjects,
-            //    ShortBio = request.TeacherDto.ShortBio,
-            //    CreatedAt = DateTime.UtcNow,
-            //    UpdatedAt = DateTime.UtcNow,
-            //    IsActive = true
-            //};
+            var teacher = new User.Api.DbEntities.MTeacher
+            {
+                EmployeeId = request.TeacherDto.EmployeeId,
+                FirstName = request.TeacherDto.FirstName,
+                LastName = request.TeacherDto.LastName,
+                Email = request.TeacherDto.Email,
+                Phone = request.TeacherDto.Phone,
+                //DateOfBirth = request.TeacherDto.DateOfBirth,
+                Gender = request.TeacherDto.Gender,
+                Qualification = request.TeacherDto.Qualification,
+                Designation = request.TeacherDto.Designation,
+                Department = request.TeacherDto.Department,
+                //JoiningDate = request.TeacherDto.JoiningDate,
+                Experience = request.TeacherDto.Experience,
+                Salary = request.TeacherDto.Salary,
+                Address = request.TeacherDto.Address,
+                City = request.TeacherDto.City,
+                State = request.TeacherDto.State,
+                ZipCode = request.TeacherDto.ZipCode,
+                BloodGroup = request.TeacherDto.BloodGroup,
+                Religion = request.TeacherDto.Religion,
+                EmergencyContact = request.TeacherDto.EmergencyContact,
+                Subjects = request.TeacherDto.Subjects,
+                ShortBio = request.TeacherDto.ShortBio,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
 
-            var teacherRepo = unitOfWork.Repository<User.Api.DbEntities.Teacher>();
-            //await teacherRepo.AddAsync(teacher);
+            var teacherRepo = unitOfWork.Repository<User.Api.DbEntities.MTeacher>();
+            await teacherRepo.AddAsync(teacher);
             await unitOfWork.SaveChangesAsync();
 
-            return null;
-                //ResponseDto.Success(Data: teacher.Id, message: "Teacher added successfully");
+            return ResponseDto.Success(Data: teacher.Id, message: "Teacher added successfully");
         }
     }
 }

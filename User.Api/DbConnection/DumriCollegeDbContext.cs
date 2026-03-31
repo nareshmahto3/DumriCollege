@@ -40,7 +40,13 @@ public partial class DumriCollegeDbContext : DbContext
 
     public virtual DbSet<MCategory> MCategories { get; set; }
 
+    public virtual DbSet<MCity> MCities { get; set; }
+
     public virtual DbSet<MClass> MClasses { get; set; }
+
+    public virtual DbSet<MDepartment> MDepartments { get; set; }
+
+    public virtual DbSet<MDesignation> MDesignations { get; set; }
 
     public virtual DbSet<MExamType> MExamTypes { get; set; }
 
@@ -50,15 +56,21 @@ public partial class DumriCollegeDbContext : DbContext
 
     public virtual DbSet<MPriority> MPriorities { get; set; }
 
+    public virtual DbSet<MQualification> MQualifications { get; set; }
+
     public virtual DbSet<MReligion> MReligions { get; set; }
+
+    public virtual DbSet<MRole> MRoles { get; set; }
+
+    public virtual DbSet<MState> MStates { get; set; }
 
     public virtual DbSet<MTargetAudience> MTargetAudiences { get; set; }
 
     public virtual DbSet<MTeacher> MTeachers { get; set; }
 
-    public virtual DbSet<Role> Roles { get; set; }
+    public virtual DbSet<MTeachingSubject> MTeachingSubjects { get; set; }
 
-    public virtual DbSet<Role1> Roles1 { get; set; }
+    public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<Room> Rooms { get; set; }
 
@@ -320,6 +332,23 @@ public partial class DumriCollegeDbContext : DbContext
             entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
+        modelBuilder.Entity<MCity>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__M_City__3214EC075A60C038");
+
+            entity.ToTable("M_City");
+
+            entity.Property(e => e.DistrictName)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.StateId).HasColumnName("StateID");
+
+            entity.HasOne(d => d.State).WithMany(p => p.MCities)
+                .HasForeignKey(d => d.StateId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__M_City__StateID__762C88DA");
+        });
+
         modelBuilder.Entity<MClass>(entity =>
         {
             entity.HasKey(e => e.ClassId).HasName("PK__Classes__CB1927C0595CB9F9");
@@ -328,6 +357,32 @@ public partial class DumriCollegeDbContext : DbContext
 
             entity.Property(e => e.ClassName)
                 .HasMaxLength(100)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<MDepartment>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__departme__3214EC07D7908CD1");
+
+            entity.ToTable("M_Departments");
+
+            entity.HasIndex(e => e.DepartmentName, "UQ__departme__D949CC34C8400B2E").IsUnique();
+
+            entity.Property(e => e.DepartmentName)
+                .HasMaxLength(150)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<MDesignation>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__M_Design__3213E83F9CECADA5");
+
+            entity.ToTable("M_Designations");
+
+            entity.HasIndex(e => e.DesigName, "UQ__M_Design__4D5D7C6024A28AC8").IsUnique();
+
+            entity.Property(e => e.DesigName)
+                .HasMaxLength(50)
                 .IsUnicode(false);
         });
 
@@ -379,6 +434,19 @@ public partial class DumriCollegeDbContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<MQualification>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__M_Qualif__3213E83FE601EA9D");
+
+            entity.ToTable("M_Qualifications");
+
+            entity.HasIndex(e => e.QualificationName, "UQ__M_Qualif__49C0FCDB5FDB5AAD").IsUnique();
+
+            entity.Property(e => e.QualificationName)
+                .HasMaxLength(150)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<MReligion>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__M_Religi__3214EC275C079325");
@@ -387,6 +455,32 @@ public partial class DumriCollegeDbContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Name).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<MRole>(entity =>
+        {
+            entity.HasKey(e => e.RoleId).HasName("PK__Roles__8AFACE1A62AD0F38");
+
+            entity.ToTable("M_Roles");
+
+            entity.HasIndex(e => e.RoleName, "UQ__Roles__8A2B616039D0223F").IsUnique();
+
+            entity.HasIndex(e => e.RoleName, "UQ__Roles__8A2B6160B6EF6C53").IsUnique();
+
+            entity.Property(e => e.RoleName).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<MState>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__M_States__3214EC07FC12A616");
+
+            entity.ToTable("M_States");
+
+            entity.HasIndex(e => e.StateName, "UQ__M_States__5547631502029459").IsUnique();
+
+            entity.Property(e => e.StateName)
+                .HasMaxLength(100)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<MTargetAudience>(entity =>
@@ -421,6 +515,19 @@ public partial class DumriCollegeDbContext : DbContext
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
         });
 
+        modelBuilder.Entity<MTeachingSubject>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__M_Teachi__3214EC07E3BCEF44");
+
+            entity.ToTable("M_Teaching_Subjects");
+
+            entity.HasIndex(e => e.SubjectName, "UQ__M_Teachi__4C5A7D55C2486EF6").IsUnique();
+
+            entity.Property(e => e.SubjectName)
+                .HasMaxLength(150)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<Role>(entity =>
         {
             entity.HasKey(e => e.RoleId).HasName("PK__role__760965CCB2EEBECD");
@@ -440,19 +547,6 @@ public partial class DumriCollegeDbContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("role_name");
-        });
-
-        modelBuilder.Entity<Role1>(entity =>
-        {
-            entity.HasKey(e => e.RoleId).HasName("PK__Roles__8AFACE1A62AD0F38");
-
-            entity.ToTable("Roles");
-
-            entity.HasIndex(e => e.RoleName, "UQ__Roles__8A2B616039D0223F").IsUnique();
-
-            entity.HasIndex(e => e.RoleName, "UQ__Roles__8A2B6160B6EF6C53").IsUnique();
-
-            entity.Property(e => e.RoleName).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Room>(entity =>
