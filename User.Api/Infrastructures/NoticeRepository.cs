@@ -11,9 +11,9 @@ namespace User.Api.Repositories
         // Add specific methods if needed
     }
 
-    public class NoticeRepository : Repository<Notice, DumriCommerceCollegeContext>, INoticeRepository
+    public class NoticeRepository : Repository<Notice, DumriCollegeDbContext>, INoticeRepository
     {
-        public NoticeRepository(DumriCommerceCollegeContext context) : base(context)
+        public NoticeRepository(DumriCollegeDbContext context) : base(context)
         {
         }
     }
@@ -23,9 +23,9 @@ namespace User.Api.Repositories
         // Add specific methods if needed
     }
 
-    public class NoticeAttachmentRepository : Repository<NoticeAttachment, DumriCommerceCollegeContext>, INoticeAttachmentRepository
+    public class NoticeAttachmentRepository : Repository<NoticeAttachment, DumriCollegeDbContext>, INoticeAttachmentRepository
     {
-        public NoticeAttachmentRepository(DumriCommerceCollegeContext context) : base(context)
+        public NoticeAttachmentRepository(DumriCollegeDbContext context) : base(context)
         {
         }
     }

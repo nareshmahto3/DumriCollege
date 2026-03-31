@@ -24,6 +24,7 @@
     <Folder Include="CQRS\Query\" />
     <Folder Include="DbConnection\" />
     <Folder Include="DbEntities\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JWT:JwtOptions"));
 //builder.AddAppService();
 builder.Services.AddControllers();
-builder.Services.AddDbContext<DumriCommerceCollegeContext>(options =>
+builder.Services.AddDbContext<DumriCollegeDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AdmissionDbConn")));
 // Register your repository
 builder.Services.AddScoped<IRepository<MRole>, RoleRepository>();
@@ -26,7 +26,7 @@ builder.Services.AddScoped<IRepository<User.Api.DbEntities.Subject>, SubjectRepo
 builder.Services.AddScoped<IRepository<Exam>, ExamRepository>();
 builder.Services.AddScoped<IRepository<ExamSubject>, ExamSubjectRepository>();
 builder.Services.AddScoped<IRepository<User.Api.DbEntities.StudentDocument>, StudentDocumentRepository>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork<DumriCommerceCollegeContext>>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork<DumriCollegeDbContext>>();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -5,9 +5,9 @@ using User.Api.DbEntities;
 
 namespace User.Api.Infrastructures
 {
-    public class SubjectRepository : Repository<Subject, DumriCommerceCollegeContext>, IRepository<Subject>
+    public class SubjectRepository : Repository<Subject, DumriCollegeDbContext>, IRepository<Subject>
     {
-        public SubjectRepository(DumriCommerceCollegeContext context) : base(context)
+        public SubjectRepository(DumriCollegeDbContext context) : base(context)
         {
         }
     }

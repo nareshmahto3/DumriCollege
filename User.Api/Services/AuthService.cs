@@ -14,16 +14,16 @@ namespace User.Api.Services
 {
     public class AuthService 
     {
-        private readonly DumriCommerceCollegeContext _context;
+        //private readonly DumriCommerceCollegeContext _context;
 
-        private readonly JwtOptions _jwtOptions;
+        //private readonly JwtOptions _jwtOptions;
 
-        public AuthService(DumriCommerceCollegeContext context, IOptions<JwtOptions> options)
-        {
-            _context = context;
+        //public AuthService(DumriCommerceCollegeContext context, IOptions<JwtOptions> options)
+        //{
+        //    _context = context;
 
-            _jwtOptions = options.Value;
-        }
+        //    _jwtOptions = options.Value;
+        //}
 
         public async Task<TokenResponseDto> LoginAsync(LoginDto model)
         {
@@ -133,24 +133,24 @@ namespace User.Api.Services
         }
 
 
-        private ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
-        {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtOptions.Secret));
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = _jwtOptions.Issuer,
-                ValidAudience = _jwtOptions.Audience,
-                IssuerSigningKey = authSigningKey,
-                ValidateLifetime = false
-            };
+        //private ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
+        //{
+        //    var authSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtOptions.Secret));
+        //    var tokenValidationParameters = new TokenValidationParameters
+        //    {
+        //        ValidateIssuer = true,
+        //        ValidateAudience = true,
+        //        ValidateIssuerSigningKey = true,
+        //        //ValidIssuer = _jwtOptions.Issuer,
+        //        //ValidAudience = _jwtOptions.Audience,
+        //        IssuerSigningKey = authSigningKey,
+        //        ValidateLifetime = false
+        //    };
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out _);
-            return principal;
-        }
+        //    var tokenHandler = new JwtSecurityTokenHandler();
+        //    var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out _);
+        //    return principal;
+        //}
 
     }
 }

@@ -4,16 +4,16 @@ using LibraryService.Utility.Data.Core.Repositories;
 
 namespace User.Api.Infrastructures
 {
-    public class ExamRepository : Repository<User.Api.DbEntities.Exam, DumriCommerceCollegeContext>, IRepository<User.Api.DbEntities.Exam>
+    public class ExamRepository : Repository<User.Api.DbEntities.Exam, DumriCollegeDbContext>, IRepository<User.Api.DbEntities.Exam>
     {
-        public ExamRepository(DumriCommerceCollegeContext context) : base(context)
+        public ExamRepository(DumriCollegeDbContext context) : base(context)
         {
         }
     }
 
-    public class ExamSubjectRepository : Repository<User.Api.DbEntities.ExamSubject, DumriCommerceCollegeContext>, IRepository<User.Api.DbEntities.ExamSubject>
+    public class ExamSubjectRepository : Repository<User.Api.DbEntities.ExamSubject, DumriCollegeDbContext>, IRepository<User.Api.DbEntities.ExamSubject>
     {
-        public ExamSubjectRepository(DumriCommerceCollegeContext context) : base(context)
+        public ExamSubjectRepository(DumriCollegeDbContext context) : base(context)
         {
         }
     }

@@ -5,9 +5,9 @@ using User.Api.DbEntities;
 
 namespace User.Api.Infrastructures
 {
-    public class RoleRepository : Repository<MRole, DumriCommerceCollegeContext>, IRepository<MRole>
+    public class RoleRepository : Repository<MRole, DumriCollegeDbContext>, IRepository<MRole>
     {
-        public RoleRepository(DumriCommerceCollegeContext context) : base(context)
+        public RoleRepository(DumriCollegeDbContext context) : base(context)
         {
         }
     }

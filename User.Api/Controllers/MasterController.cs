@@ -23,5 +23,17 @@ namespace User.Api.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
            
         }
+
+        // ✅ Dynamic Table API (CQRS)
+        [HttpGet("{tableName}")]
+        public async Task<IActionResult> GetTableData(string tableName)
+        {
+            if (string.IsNullOrWhiteSpace(tableName))
+                return BadRequest("Table name is required");
+
+            var result = await _mediator.Send(new MasterCommand(tableName));
+
+            return Ok(result);
+        }
     }
 }
