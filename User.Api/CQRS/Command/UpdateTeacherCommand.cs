@@ -1,5 +1,6 @@
-using User.Api.DTOs;
 using MediatR;
+using User.Api.DTOs;
+using User.Api.Models;
 
 namespace User.Api.CQRS.Command
 {
@@ -7,9 +8,9 @@ namespace User.Api.CQRS.Command
     {
         public int Id { get; set; }
 
-        public AddTeacherDto TeacherDto { get; set; }
+        public AddTeacherModel TeacherDto { get; set; }
 
-        public UpdateTeacherCommand(int id, AddTeacherDto teacherDto)
+        public UpdateTeacherCommand(int id, AddTeacherModel teacherDto)
         {
             Id = id;
             TeacherDto = teacherDto;

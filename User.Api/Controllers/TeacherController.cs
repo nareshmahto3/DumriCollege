@@ -4,13 +4,15 @@ using Microsoft.AspNetCore.Mvc;
 using User.Api.CQRS.Command;
 using User.Api.DTOs;
 using MediatR;
+using User.Api.Models;
 
 namespace User.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class TeacherController : ControllerBase
+
     {
         private readonly IMediator _mediator;
 
@@ -27,8 +29,10 @@ namespace User.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> AddTeacher([FromBody] AddTeacherDto teacherDto)
+        [Route("add-teacher")]
+        public async Task<IActionResult> AddTeacher()
         {
+            AddTeacherModel teacherDto = new();
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -49,6 +53,7 @@ namespace User.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [AllowAnonymous]
         [HttpPost]
+
         [Route("AddWithPhoto")]
         public async Task<IActionResult> AddTeacherWithPhoto([FromForm] AddTeacherFormDto teacherFormDto)
         {
@@ -105,7 +110,7 @@ namespace User.Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTeacher(int id, [FromBody] AddTeacherDto teacherDto)
+        public async Task<IActionResult> UpdateTeacher(int id, [FromBody] AddTeacherModel teacherDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

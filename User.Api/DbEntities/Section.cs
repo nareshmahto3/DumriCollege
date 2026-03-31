@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace User.Api.DbEntities;
 
-public partial class Subject
+public partial class Section
 {
-    public int SubjectId { get; set; }
+    public int SectionId { get; set; }
 
-    public string SubjectName { get; set; } = null!;
+    public string SectionName { get; set; } = null!;
 
     public int ClassId { get; set; }
 

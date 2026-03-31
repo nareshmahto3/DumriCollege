@@ -66,12 +66,12 @@ public partial class DumriCommerceCollegeContext : DbContext
         {
             entity.ToTable("User");
 
-            entity.Property(e => e.Email).HasMaxLength(150);
-            entity.Property(e => e.Name).HasMaxLength(250);
-            entity.Property(e => e.Password).HasMaxLength(50);
-            entity.Property(e => e.RefreshToken).HasMaxLength(250);
-            entity.Property(e => e.RefreshTokenExpiry).HasColumnType("datetime");
-            entity.Property(e => e.UserId).HasMaxLength(150);
+            //entity.Property(e => e.Email).HasMaxLength(150);
+            //entity.Property(e => e.Name).HasMaxLength(250);
+            //entity.Property(e => e.Password).HasMaxLength(50);
+            //entity.Property(e => e.RefreshToken).HasMaxLength(250);
+            //entity.Property(e => e.RefreshTokenExpiry).HasColumnType("datetime");
+            //entity.Property(e => e.UserId).HasMaxLength(150);
         });
 
         modelBuilder.Entity<UserRole>(entity =>
@@ -115,139 +115,139 @@ public partial class DumriCommerceCollegeContext : DbContext
         {
             entity.ToTable("Class");
 
-            entity.HasKey(e => e.Id);
+            //entity.HasKey(e => e.Id);
 
-            entity.Property(e => e.ClassName).HasMaxLength(100);
-            entity.Property(e => e.Section).HasMaxLength(10);
-            entity.Property(e => e.RoomNumber).HasMaxLength(20);
-            entity.Property(e => e.AcademicYear).HasMaxLength(20);
-            entity.Property(e => e.Subjects).HasMaxLength(1000);
-            entity.Property(e => e.StartDate).HasColumnType("date");
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
-            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
-
-            // Foreign key relationship
-            entity.HasOne(c => c.ClassTeacher)
-                  .WithMany()
-                  .HasForeignKey(c => c.ClassTeacherId)
-                  .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<Subject>(entity =>
-        {
-            entity.ToTable("Subject");
-
-            entity.HasKey(e => e.Id);
-
-            entity.Property(e => e.SubjectName).HasMaxLength(200);
-            entity.Property(e => e.SubjectCode).HasMaxLength(20);
-            entity.Property(e => e.Type).HasMaxLength(20);
-            entity.Property(e => e.Description).HasMaxLength(1000);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
-            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
-
-            // Foreign key relationships
-            entity.HasOne(s => s.Class)
-                  .WithMany()
-                  .HasForeignKey(s => s.ClassId)
-                  .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(s => s.Teacher)
-                  .WithMany()
-                  .HasForeignKey(s => s.TeacherId)
-                  .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<Exam>(entity =>
-        {
-            entity.ToTable("Exam");
-
-            entity.HasKey(e => e.Id);
-
-            entity.Property(e => e.ExamName).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.ExamType).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.Class).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.AcademicYear).HasMaxLength(20).IsRequired();
-            entity.Property(e => e.StartDate).HasColumnType("date").IsRequired();
-            entity.Property(e => e.EndDate).HasColumnType("date").IsRequired();
-            entity.Property(e => e.Venue).HasMaxLength(250).IsRequired();
-            entity.Property(e => e.Instructions).HasMaxLength(1000);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
-            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
-        });
-
-        modelBuilder.Entity<ExamSubject>(entity =>
-        {
-            entity.ToTable("ExamSubject");
-
-            entity.HasKey(e => e.Id);
-
-            entity.Property(e => e.Subject).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.Date).HasColumnType("date").IsRequired();
-            entity.Property(e => e.StartTime).HasColumnType("time").IsRequired();
-            entity.Property(e => e.EndTime).HasColumnType("time").IsRequired();
-            entity.Property(e => e.MaxMarks).IsRequired();
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            //entity.Property(e => e.ClassName).HasMaxLength(100);
+            //entity.Property(e => e.Section).HasMaxLength(10);
+            //entity.Property(e => e.RoomNumber).HasMaxLength(20);
+            //entity.Property(e => e.AcademicYear).HasMaxLength(20);
+            //entity.Property(e => e.Subjects).HasMaxLength(1000);
+            //entity.Property(e => e.StartDate).HasColumnType("date");
+            //entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            //entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
 
             // Foreign key relationship
-            entity.HasOne(es => es.Exam)
-                  .WithMany(e => e.ExamSubjects)
-                  .HasForeignKey(es => es.ExamId)
-                  .OnDelete(DeleteBehavior.Cascade);
+            //    entity.HasOne(c => c.ClassTeacher)
+            //          .WithMany()
+            //          .HasForeignKey(c => c.ClassTeacherId)
+            //          .OnDelete(DeleteBehavior.Restrict);
+            //});
+
+            modelBuilder.Entity<Subject>(entity =>
+            {
+                entity.ToTable("Subject");
+
+                //entity.HasKey(e => e.Id);
+
+                //entity.Property(e => e.SubjectName).HasMaxLength(200);
+                //entity.Property(e => e.SubjectCode).HasMaxLength(20);
+                //entity.Property(e => e.Type).HasMaxLength(20);
+                //entity.Property(e => e.Description).HasMaxLength(1000);
+                //entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+                //entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+
+                // Foreign key relationships
+                entity.HasOne(s => s.Class)
+                      .WithMany()
+                      .HasForeignKey(s => s.ClassId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                //entity.HasOne(s => s.Teacher)
+                //      .WithMany()
+                //      .HasForeignKey(s => s.TeacherId)
+                //      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Exam>(entity =>
+            {
+                entity.ToTable("Exam");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.ExamName).HasMaxLength(200).IsRequired();
+                entity.Property(e => e.ExamType).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.Class).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.AcademicYear).HasMaxLength(20).IsRequired();
+                entity.Property(e => e.StartDate).HasColumnType("date").IsRequired();
+                entity.Property(e => e.EndDate).HasColumnType("date").IsRequired();
+                entity.Property(e => e.Venue).HasMaxLength(250).IsRequired();
+                entity.Property(e => e.Instructions).HasMaxLength(1000);
+                entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+                entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<ExamSubject>(entity =>
+            {
+                entity.ToTable("ExamSubject");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Subject).HasMaxLength(100).IsRequired();
+                entity.Property(e => e.Date).HasColumnType("date").IsRequired();
+                entity.Property(e => e.StartTime).HasColumnType("time").IsRequired();
+                entity.Property(e => e.EndTime).HasColumnType("time").IsRequired();
+                entity.Property(e => e.MaxMarks).IsRequired();
+                entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+
+                // Foreign key relationship
+                entity.HasOne(es => es.Exam)
+                      .WithMany(e => e.ExamSubjects)
+                      .HasForeignKey(es => es.ExamId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Notice>(entity =>
+            {
+                entity.ToTable("Notice");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
+                entity.Property(e => e.Category).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.Priority).HasMaxLength(20).IsRequired();
+                entity.Property(e => e.TargetAudience).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.PublishDate).HasColumnType("date").IsRequired();
+                entity.Property(e => e.ExpiryDate).HasColumnType("date");
+                entity.Property(e => e.Content).IsRequired();
+                entity.Property(e => e.NoticeNumber).HasMaxLength(50);
+                entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+                entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<NoticeAttachment>(entity =>
+            {
+                entity.ToTable("NoticeAttachment");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.FileName).HasMaxLength(255).IsRequired();
+                entity.Property(e => e.FilePath).HasMaxLength(500).IsRequired();
+
+                // Foreign key relationship
+                entity.HasOne(na => na.Notice)
+                      .WithMany(n => n.NoticeAttachments)
+                      .HasForeignKey(na => na.NoticeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<StudentDocument>(entity =>
+            {
+                entity.ToTable("StudentDocument");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.StudentId).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.DocumentName).IsRequired().HasMaxLength(250);
+                entity.Property(e => e.DocumentType).IsRequired().HasMaxLength(150);
+                entity.Property(e => e.OriginalFileName).IsRequired().HasMaxLength(250);
+                entity.Property(e => e.FilePath).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.FileSize).IsRequired();
+                entity.Property(e => e.Status).IsRequired().HasMaxLength(50).HasDefaultValue("pending");
+                entity.Property(e => e.UploadDate).HasColumnType("datetime").IsRequired();
+                entity.Property(e => e.VerifiedDate).HasColumnType("datetime");
+                entity.Property(e => e.Remarks).HasMaxLength(500);
+            });
+
+            OnModelCreatingPartial(modelBuilder);
         });
-
-        modelBuilder.Entity<Notice>(entity =>
-        {
-            entity.ToTable("Notice");
-
-            entity.HasKey(e => e.Id);
-
-            entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.Category).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.Priority).HasMaxLength(20).IsRequired();
-            entity.Property(e => e.TargetAudience).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.PublishDate).HasColumnType("date").IsRequired();
-            entity.Property(e => e.ExpiryDate).HasColumnType("date");
-            entity.Property(e => e.Content).IsRequired();
-            entity.Property(e => e.NoticeNumber).HasMaxLength(50);
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
-            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
-        });
-
-        modelBuilder.Entity<NoticeAttachment>(entity =>
-        {
-            entity.ToTable("NoticeAttachment");
-
-            entity.HasKey(e => e.Id);
-
-            entity.Property(e => e.FileName).HasMaxLength(255).IsRequired();
-            entity.Property(e => e.FilePath).HasMaxLength(500).IsRequired();
-
-            // Foreign key relationship
-            entity.HasOne(na => na.Notice)
-                  .WithMany(n => n.NoticeAttachments)
-                  .HasForeignKey(na => na.NoticeId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<StudentDocument>(entity =>
-        {
-            entity.ToTable("StudentDocument");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.StudentId).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.DocumentName).IsRequired().HasMaxLength(250);
-            entity.Property(e => e.DocumentType).IsRequired().HasMaxLength(150);
-            entity.Property(e => e.OriginalFileName).IsRequired().HasMaxLength(250);
-            entity.Property(e => e.FilePath).IsRequired().HasMaxLength(500);
-            entity.Property(e => e.FileSize).IsRequired();
-            entity.Property(e => e.Status).IsRequired().HasMaxLength(50).HasDefaultValue("pending");
-            entity.Property(e => e.UploadDate).HasColumnType("datetime").IsRequired();
-            entity.Property(e => e.VerifiedDate).HasColumnType("datetime");
-            entity.Property(e => e.Remarks).HasMaxLength(500);
-        });
-
-        OnModelCreatingPartial(modelBuilder);
     }
-
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }
