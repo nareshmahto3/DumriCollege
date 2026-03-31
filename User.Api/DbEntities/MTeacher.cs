@@ -1,0 +1,63 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace User.Api.DbEntities;
+
+public partial class MTeacher
+{
+    public int Id { get; set; }
+
+    public string EmployeeId { get; set; } = null!;
+
+    public string FirstName { get; set; } = null!;
+
+    public string LastName { get; set; } = null!;
+
+    public string Email { get; set; } = null!;
+
+    public string Phone { get; set; } = null!;
+
+    public DateOnly? DateOfBirth { get; set; }
+
+    public int? Gender { get; set; }
+
+    public int? Qualification { get; set; }
+
+    public int? Designation { get; set; }
+
+    public int? Department { get; set; }
+
+    public DateOnly? JoiningDate { get; set; }
+
+    public int? Experience { get; set; }
+
+    public decimal? Salary { get; set; }
+
+    public string? Address { get; set; }
+
+    public int? City { get; set; }
+
+    public int? State { get; set; }
+
+    public int? ZipCode { get; set; }
+
+    public int? BloodGroup { get; set; }
+
+    public int? Religion { get; set; }
+
+    public string? EmergencyContact { get; set; }
+
+    public int? Subjects { get; set; }
+
+    public string? ShortBio { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+
+    public int? CreatedBy { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    public int? UpdatedBy { get; set; }
+
+    public bool? IsActive { get; set; }
+}

@@ -58,7 +58,7 @@ namespace User.Api.Services
             // entity.DateOfBirth = userDto.DateOfBirth;
             // entity.Email = userDto.Email;
             //entity.Mobile = userDto.Mobile;
-            entity.Name = userDto.Name;
+            //entity.Name = userDto.Name;
             //  entity.IsActive = true;
             // entity.UpdatedDate = DateTime.UtcNow;
             _context.Users.Update(entity);

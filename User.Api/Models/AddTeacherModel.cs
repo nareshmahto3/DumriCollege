@@ -1,6 +1,7 @@
-namespace User.Api.Models
+﻿namespace User.Api.Models
 {
-    public class AddTeacherDto
+    public class AddTeacherModel
+
     {
         public int Id { get; set; }
 

@@ -27,101 +27,102 @@ namespace User.Api.Services
 
         public async Task<TokenResponseDto> LoginAsync(LoginDto model)
         {
-            var user = await (
-                            from u in _context.Users
-                            join ur in _context.UserRoles on u.Id equals ur.UserId
-                            join r in _context.MRoles on ur.RoleId equals r.RoleId
-                            where u.Email == model.Email
-                            select u
-                        ).FirstOrDefaultAsync();
+            var user = model;
+                //await (
+                            //from u in _context.Users
+                            //join ur in _context.UserRoles on u.Id equals ur.UserId
+                            //join r in _context.MRoles on ur.RoleId equals r.RoleId
+                            //where u.Email == model.Email
+                            //select u
+                        //).FirstOrDefaultAsync();
 
             if (user == null) return null;
 
             // Validate password (hash comparison)
-            if (!PasswordHelper.ValidatePassword(model.Password, user.PasswordHash)) return null;
+            //if (!PasswordHelper.ValidatePassword(model.Password, user.PasswordHash)) return null;
 
 
-            var accessToken = GenerateJwtToken(user);
-            var refreshToken = GenerateRefreshToken();
+            //var accessToken = GenerateJwtToken(user);
+            //var refreshToken = GenerateRefreshToken();
 
 
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+            //user.RefreshToken = refreshToken;
+            //user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
 
-            _context.Users.Update(user); // Save changes to DB
+            //_context.Users.Update(user); // Save changes to DB
 
             return new TokenResponseDto
             {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
+                //AccessToken = accessToken,
+                //RefreshToken = refreshToken
             };
 
 
         }
 
-        public string GenerateJwtToken(User.Api.DbEntities.User user)
-        {
-            var authClaims = new List<Claim>
-                                { new Claim(ClaimTypes.Name, user.Name),
-                                    new Claim(ClaimTypes.Email, user.Email),
-                                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                                };
+        //public string GenerateJwtToken(User.Api.DbEntities.User user)
+        //{
+        //    var authClaims = new List<Claim>
+        //                        { new Claim(ClaimTypes.Name, user.Name),
+        //                            new Claim(ClaimTypes.Email, user.Email),
+        //                            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        //                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        //                        };
 
-            // Add role claims
-                            var roles = (
-                                            from u in _context.Users
-                                            join ur in _context.UserRoles on u.Id equals ur.UserId
-                                            join r in _context.MRoles on ur.RoleId equals r.RoleId
-                                            where u.Email == user.Email
-                                            select r.RoleName
-                                        ).ToList();
-            authClaims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        //    // Add role claims
+        //                    var roles = (
+        //                                    from u in _context.Users
+        //                                    join ur in _context.UserRoles on u.Id equals ur.UserId
+        //                                    join r in _context.MRoles on ur.RoleId equals r.RoleId
+        //                                    where u.Email == user.Email
+        //                                    select r.RoleName
+        //                                ).ToList();
+        //    authClaims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-            var authSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtOptions.Secret));
+        //    var authSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtOptions.Secret));
 
-            var creds = new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256);
+        //    var creds = new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
-                issuer: _jwtOptions.Issuer,
-                audience: _jwtOptions.Audience,
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_jwtOptions.ExpireMinutes)),
-                claims: authClaims,
-                signingCredentials: creds
-            );
+        //    var token = new JwtSecurityToken(
+        //        issuer: _jwtOptions.Issuer,
+        //        audience: _jwtOptions.Audience,
+        //        expires: DateTime.Now.AddMinutes(Convert.ToDouble(_jwtOptions.ExpireMinutes)),
+        //        claims: authClaims,
+        //        signingCredentials: creds
+        //    );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+        //    return new JwtSecurityTokenHandler().WriteToken(token);
+        //}
 
-        public async Task<TokenResponseDto?> RefreshTokenAsync(RefreshRequest request)
-        {
+        //public async Task<TokenResponseDto?> RefreshTokenAsync(RefreshRequest request)
+        //{
 
-            var principal = GetPrincipalFromExpiredToken(request.AccessToken);
+        //    var principal = GetPrincipalFromExpiredToken(request.AccessToken);
 
-            if (principal == null)
-                return null;
+        //    if (principal == null)
+        //        return null;
 
-            var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            var user = await _context.Users.FindAsync(Convert.ToInt32(userId));
-            if (user == null || user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
-                //return Unauthorized("Refresh token expired or invalid.");
-                return null;
+        //    var user = await _context.Users.FindAsync(Convert.ToInt32(userId));
+        //    if (user == null || user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
+        //        //return Unauthorized("Refresh token expired or invalid.");
+        //        return null;
 
-            var accessToken = GenerateJwtToken(user);
-            var refreshToken = GenerateRefreshToken();
+        //    var accessToken = GenerateJwtToken(user);
+        //    var refreshToken = GenerateRefreshToken();
 
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+        //    user.RefreshToken = refreshToken;
+        //    user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
 
-            _context.Users.Update(user);
+        //    _context.Users.Update(user);
 
-            return new TokenResponseDto
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
-            };
-        }
+        //    return new TokenResponseDto
+        //    {
+        //        AccessToken = accessToken,
+        //        RefreshToken = refreshToken
+        //    };
+        //}
 
         private string GenerateRefreshToken()
         {

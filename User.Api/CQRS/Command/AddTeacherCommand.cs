@@ -5,9 +5,9 @@ namespace User.Api.CQRS.Command
 {
     public class AddTeacherCommand : IRequest<ResponseDto>
     {
-        public AddTeacherDto TeacherDto { get; set; }
+        public Models.AddTeacherModel TeacherDto { get; set; }
 
-        public AddTeacherCommand(AddTeacherDto teacherDto)
+        public AddTeacherCommand(Models.AddTeacherModel teacherDto)
         {
             TeacherDto = teacherDto;
         }
