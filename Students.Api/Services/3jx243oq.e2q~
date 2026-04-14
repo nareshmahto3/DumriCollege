@@ -1,0 +1,429 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using LibraryService.Utility.Data.Core.Interfaces;
+using Microsoft.AspNetCore.Hosting;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using Students.Api.DbEntities;
+
+namespace Students.Api.Services
+{
+    public class StudentPdfService : IStudentPdfService
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IWebHostEnvironment _env;
+
+        public StudentPdfService(IUnitOfWork unitOfWork, IWebHostEnvironment env)
+        {
+            _unitOfWork = unitOfWork;
+            _env = env;
+        }
+
+        public async Task<byte[]> GenerateStudentApplicationPdf(int applicationId)
+        {
+            var appRepo = _unitOfWork.Repository<StudentApplication>();
+            var subjectSelRepo = _unitOfWork.Repository<StudentSubjectSelection>();
+            var facultyRepo = _unitOfWork.Repository<Faculty>();
+            var compRepo = _unitOfWork.Repository<CompulsorySubject>();
+            var optRepo = _unitOfWork.Repository<OptionalSubject>();
+            var addRepo = _unitOfWork.Repository<AdditionalSubject>();
+            var facultyCompRepo = _unitOfWork.Repository<FacultyCompulsorySubject>();
+            var examRepo = _unitOfWork.Repository<StudentExamDetail>();
+            var certRepo = _unitOfWork.Repository<StudentCertificate>();
+
+            var applications = await appRepo.GetAllAsync();
+            var application = applications.FirstOrDefault(a => a.ApplicationId == applicationId);
+            if (application == null)
+                throw new InvalidOperationException("Application not found.");
+
+            var subjectSelections = await subjectSelRepo.GetAllAsync();
+            var subjectSelection = subjectSelections.FirstOrDefault(s => s.ApplicationId == applicationId);
+
+            Faculty? faculty = null;
+            CompulsorySubject? compSubject = null;
+            OptionalSubject? opt1 = null;
+            OptionalSubject? opt2 = null;
+            OptionalSubject? opt3 = null;
+            AdditionalSubject? addSubject = null;
+
+            if (subjectSelection != null)
+            {
+                if (subjectSelection.FacultyId.HasValue)
+                    faculty = await facultyRepo.GetByIdAsync(subjectSelection.FacultyId.Value);
+
+                if (subjectSelection.CompulsorySubjectId.HasValue)
+                    compSubject = await compRepo.GetByIdAsync(subjectSelection.CompulsorySubjectId.Value);
+
+                if (subjectSelection.OptionalSubject1.HasValue)
+                    opt1 = await optRepo.GetByIdAsync(subjectSelection.OptionalSubject1.Value);
+
+                if (subjectSelection.OptionalSubject2.HasValue)
+                    opt2 = await optRepo.GetByIdAsync(subjectSelection.OptionalSubject2.Value);
+
+                if (subjectSelection.OptionalSubject3.HasValue)
+                    opt3 = await optRepo.GetByIdAsync(subjectSelection.OptionalSubject3.Value);
+
+                if (subjectSelection.AdditionalSubjectId.HasValue)
+                    addSubject = await addRepo.GetByIdAsync(subjectSelection.AdditionalSubjectId.Value);
+            }
+
+            var examDetails = (await examRepo.GetAllAsync())
+                .Where(e => e.ApplicationId == applicationId)
+                .OrderBy(e => e.YearOfPassing)
+                .ToList();
+
+            var certificates = (await certRepo.GetAllAsync())
+                .Where(c => c.ApplicationId == applicationId)
+                .ToList();
+
+            // Get faculty-compulsory mapping for the selected faculty
+            var facultyCompAll = await facultyCompRepo.GetAllAsync();
+            var facultyCompulsories = facultyCompAll
+                .Where(fc => fc.FacultyId == subjectSelection?.FacultyId)
+                .Select(fc => fc.SubjectName)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .ToList();
+
+            var compSubjectsDisplay = facultyCompulsories.Any()
+                ? string.Join(", ", facultyCompulsories)
+                : compSubject?.SubjectName ?? string.Empty;
+
+            var photoCert = certificates
+                .FirstOrDefault(c => c.CertificateType != null &&
+                                     c.CertificateType.Equals("Profile Photo", StringComparison.OrdinalIgnoreCase));
+
+            byte[]? photoBytes = null;
+            if (photoCert != null && !string.IsNullOrWhiteSpace(photoCert.FilePath))
+            {
+                var root = _env.WebRootPath ?? _env.ContentRootPath ?? Directory.GetCurrentDirectory();
+                var fullPath = Path.Combine(root, photoCert.FilePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+
+                if (File.Exists(fullPath))
+                    photoBytes = await File.ReadAllBytesAsync(fullPath);
+            }
+
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Margin(20);
+                    page.Size(PageSizes.A4);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(9));
+
+                    // HEADER
+                    page.Header().Element(c =>
+                    {
+                        c.Row(row =>
+                        {
+                            row.RelativeItem(3).Column(col =>
+                            {
+                                col.Item().AlignCenter().Text("DUMRI COLLEGE DUMRI")
+                                    .Bold().FontSize(16);
+                                col.Item().AlignCenter().Text("GOVERNMENT STUDENT ADMISSION FORM")
+                                    .Bold().FontSize(12);
+
+                                col.Item().AlignLeft().PaddingTop(6).Text(text =>
+                                {
+                                    text.Span("Application ID: ").Bold();
+                                    text.Span(application.ApplicationId.ToString());
+                                });
+
+                                col.Item().AlignLeft().Text(text =>
+                                {
+                                    text.Span("Date: ").Bold();
+                                    text.Span(DateTime.Now.ToString("dd-MM-yyyy"));
+                                });
+                            });
+
+                            row.ConstantItem(120).AlignRight().AlignMiddle().Border(1).Padding(5).Column(col =>
+                            {
+                                col.Item().AlignCenter().Text("Photo").FontSize(10);
+                                col.Item().Element(e =>
+                                {
+                                    if (photoBytes != null)
+                                    {
+                                        e.Image(photoBytes).FitArea();
+                                    }
+                                    else
+                                    {
+                                        e.AlignCenter().AlignMiddle()
+                                            .Text("No Photo").FontSize(9);
+                                    }
+                                });
+                            });
+                        });
+                    });
+
+                    // CONTENT
+                    page.Content().PaddingVertical(10).Column(col =>
+                    {
+                        // PERSONAL DETAILS
+                        col.Item().PaddingTop(10).Text("Student Personal Details")
+                            .Bold().FontSize(13).Underline();
+
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(2);
+                            });
+
+                            void Row(string label, string? value)
+                            {
+                                table.Cell().Element(c => c.PaddingVertical(1).PaddingRight(4).AlignLeft())
+                                    .Text(label).SemiBold();
+                                table.Cell().Element(c => c.PaddingVertical(1).AlignLeft())
+                                    .Text(value ?? string.Empty);
+                            }
+
+                            Row("Student Name", application.StudentName);
+                            Row("Father Name", application.FatherName);
+                            Row("Mother Name", application.MotherName);
+                            Row("Date of Birth", application.DateOfBirth?.ToString("dd-MM-yyyy"));
+                            Row("Gender", application.Gender);
+                            Row("Religion", application.Religion);
+                            Row("Nationality", application.Nationality);
+                            Row("Caste", application.Caste);
+                            Row("Category", application.Category);
+                            Row("Blood Group", application.BloodGroup);
+                            Row("Identification Mark", application.IdentificationMark);
+                            Row("Marital Status", application.MaritalStatus);
+                            Row("Aadhaar Number", application.AadhaarNumber);
+                            Row("Mobile Number", application.MobileNumber);
+                            Row("Height", application.Height);
+                            Row("Weight", application.Weight);
+                        });
+
+                        // ADDRESS
+                        col.Item().PaddingTop(6).Text("Address Details")
+                            .Bold().FontSize(11).Underline();
+
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(3);
+                            });
+
+                            table.Cell().Element(c => c.PaddingVertical(2))
+                                .Text("Permanent Address").SemiBold();
+                            table.Cell().Element(c => c.PaddingVertical(2))
+                                .Text(application.PermanentAddress ?? string.Empty);
+
+                            table.Cell().Element(c => c.PaddingVertical(2))
+                                .Text("Local Address").SemiBold();
+                            table.Cell().Element(c => c.PaddingVertical(2))
+                                .Text(application.LocalAddress ?? string.Empty);
+                        });
+
+                        // FACULTY + SUBJECTS
+                        col.Item().PaddingTop(6).Text("Faculty and Subjects")
+                            .Bold().FontSize(11).Underline();
+
+                        var facultyName = faculty?.FacultyName ?? string.Empty;
+                        var compName = compSubjectsDisplay;
+                        var opt1Name = opt1?.SubjectName ?? string.Empty;
+                        var opt2Name = opt2?.SubjectName ?? string.Empty;
+                        var opt3Name = opt3?.SubjectName ?? string.Empty;
+                        var addName = addSubject?.SubjectName ?? string.Empty;
+
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(3);
+                            });
+
+                            void SubRow(string label, string value)
+                            {
+                                table.Cell().Element(c => c.PaddingVertical(2))
+                                    .Text(label).SemiBold();
+                                table.Cell().Element(c => c.PaddingVertical(2))
+                                    .Text(value);
+                            }
+
+                            SubRow("Faculty", facultyName);
+                            SubRow("Compulsory Subject", compName);
+                            SubRow("Optional Subject 1", opt1Name);
+                            SubRow("Optional Subject 2", opt2Name);
+                            SubRow("Optional Subject 3", opt3Name);
+                            SubRow("Additional Subject", addName);
+                        });
+
+                        // EXAM DETAILS
+                        col.Item().PaddingTop(6).Text("Exam Details")
+                            .Bold().FontSize(11).Underline();
+
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(2);
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Element(c => c.Background(Colors.Grey.Lighten3)
+                                                             .Padding(3).Border(0.5f))
+                                      .Text("School / College").SemiBold().FontSize(10);
+                                header.Cell().Element(c => c.Background(Colors.Grey.Lighten3)
+                                                             .Padding(3).Border(0.5f))
+                                      .Text("Board / Council").SemiBold().FontSize(10);
+                                header.Cell().Element(c => c.Background(Colors.Grey.Lighten3)
+                                                             .Padding(3).Border(0.5f))
+                                      .Text("Exam Name").SemiBold().FontSize(10);
+                                header.Cell().Element(c => c.Background(Colors.Grey.Lighten3)
+                                                             .Padding(3).Border(0.5f))
+                                      .Text("Year Of Passing").SemiBold().FontSize(10);
+                                header.Cell().Element(c => c.Background(Colors.Grey.Lighten3)
+                                                             .Padding(3).Border(0.5f))
+                                      .Text("Division / Rank").SemiBold().FontSize(10);
+                                header.Cell().Element(c => c.Background(Colors.Grey.Lighten3)
+                                                             .Padding(3).Border(0.5f))
+                                      .Text("Subjects").SemiBold().FontSize(10);
+                            });
+
+                            foreach (var e in examDetails)
+                            {
+                                table.Cell().Element(c => c.Padding(3).Border(0.5f))
+                                    .Text(e.SchoolCollege ?? string.Empty).FontSize(10);
+                                table.Cell().Element(c => c.Padding(3).Border(0.5f))
+                                    .Text(e.BoardCouncil ?? string.Empty).FontSize(10);
+                                table.Cell().Element(c => c.Padding(3).Border(0.5f))
+                                    .Text(e.ExamName ?? string.Empty).FontSize(10);
+                                table.Cell().Element(c => c.Padding(3).Border(0.5f))
+                                    .Text(e.YearOfPassing?.ToString() ?? string.Empty).FontSize(10);
+                                table.Cell().Element(c => c.Padding(3).Border(0.5f))
+                                    .Text(e.DivisionOrRank ?? string.Empty).FontSize(10);
+                                table.Cell().Element(c => c.Padding(3).Border(0.5f))
+                                    .Text(e.Subjects ?? string.Empty).FontSize(10);
+                            }
+                        });
+
+                        // CERTIFICATES
+                        col.Item().PaddingTop(6).Text("Certificates")
+                            .Bold().FontSize(11).Underline();
+
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Element(c => c.Background(Colors.Grey.Lighten3)
+                                                             .Padding(3).Border(0.5f))
+                                      .Text("Certificate Type").SemiBold().FontSize(10);
+                                header.Cell().Element(c => c.Background(Colors.Grey.Lighten3)
+                                                             .Padding(3).Border(0.5f))
+                                      .Text("Certificate Number").SemiBold().FontSize(10);
+                                header.Cell().Element(c => c.Background(Colors.Grey.Lighten3)
+                                                             .Padding(3).Border(0.5f))
+                                      .Text("Issue Date").SemiBold().FontSize(10);
+                                header.Cell().Element(c => c.Background(Colors.Grey.Lighten3)
+                                                             .Padding(3).Border(0.5f))
+                                      .Text("Issued By").SemiBold().FontSize(10);
+                            });
+
+                            foreach (var c in certificates)
+                            {
+                                table.Cell().Element(x => x.Padding(3).Border(0.5f))
+                                    .Text(c.CertificateType ?? string.Empty).FontSize(10);
+                                table.Cell().Element(x => x.Padding(3).Border(0.5f))
+                                    .Text(c.CertificateNumber ?? string.Empty).FontSize(10);
+                                table.Cell().Element(x => x.Padding(3).Border(0.5f))
+                                    .Text(c.IssueDate?.ToString("dd-MM-yyyy") ?? string.Empty).FontSize(10);
+                                table.Cell().Element(x => x.Padding(3).Border(0.5f))
+                                    .Text(c.IssuedBy ?? string.Empty).FontSize(10);
+                            }
+                        });
+
+                        // UPLOADED DOCS
+                        col.Item().PaddingTop(6).Text("Uploaded Documents")
+                            .Bold().FontSize(11).Underline();
+
+                        string? GetDocPath(string type) =>
+                            certificates
+                                .FirstOrDefault(c => c.CertificateType != null &&
+                                                     c.CertificateType.Equals(type, StringComparison.OrdinalIgnoreCase))
+                                ?.FilePath;
+
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(4);
+                            });
+
+                            void DocRow(string label, string? path)
+                            {
+                                table.Cell().Element(c => c.PaddingVertical(2))
+                                    .Text(label).SemiBold();
+                                table.Cell().Element(c => c.PaddingVertical(2))
+                                    .Text(path ?? "Not Uploaded");
+                            }
+
+                            DocRow("Caste Certificate", GetDocPath("Caste Certificate"));
+                            DocRow("School Leaving Certificate", GetDocPath("School Leaving Certificate"));
+                            DocRow("Admit Card", GetDocPath("Admit Card"));
+                            DocRow("Marksheet", GetDocPath("Marksheet"));
+                            DocRow("Aadhaar Card", GetDocPath("Aadhaar Card"));
+                        });
+
+                        // DECLARATION
+                        col.Item().PaddingTop(16).Text("Declaration")
+                            .Bold().FontSize(11).Underline();
+
+                        col.Item().PaddingTop(5).Text(
+                            "I hereby declare that the information provided above is true and correct to the best of my knowledge and belief."
+                        ).FontSize(11);
+
+                        // SIGNATURES
+                        col.Item().PaddingTop(30).Row(row =>
+                        {
+                            row.RelativeItem(1).Column(c2 =>
+                            {
+                                c2.Item().Text("Student Signature").AlignLeft();
+                                c2.Item().Text($"Date: {DateTime.Now:dd-MM-yyyy}")
+                                    .AlignLeft().FontSize(10);
+                            });
+
+                            row.RelativeItem(1).AlignRight().Column(c2 =>
+                            {
+                                c2.Item().Text("Authority Signature").AlignRight();
+                            });
+                        });
+                    });
+
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Generated by Students.Api - ").FontSize(8);
+                        x.Span(DateTime.Now.ToString("dd-MM-yyyy HH:mm")).FontSize(8);
+                    });
+                });
+            });
+
+            return document.GeneratePdf();
+        }
+    }
+}
