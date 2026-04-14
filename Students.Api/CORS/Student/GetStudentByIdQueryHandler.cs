@@ -23,9 +23,11 @@ namespace Students.Api.CORS.Student
             var query = _dbContext.StudentApplications
                 .AsNoTracking()
                 .Where(a => a.ApplicationId == request.ApplicationId)
+                .Where(a => a.IsActive)
                 .Include(a => a.Religion)
                 .Include(a => a.Caste)
                 .Include(a => a.Category)
+                .Include(a => a.Class)
                 .Include(a => a.Gender)
                 .Include(a => a.BloodGroup)
                 .Include(a => a.MaritalStatus)
@@ -58,6 +60,7 @@ namespace Students.Api.CORS.Student
             var facultyCompulsorySubjects = new System.Collections.Generic.List<string>();
 
             var firstSelection = entity.StudentSubjectSelections
+                .Where(s => s.IsActive)
                 .OrderBy(s => s.Id)
                 .FirstOrDefault();
 
@@ -86,6 +89,8 @@ namespace Students.Api.CORS.Student
             {
                 // Basic
                 ApplicationId = entity.ApplicationId,
+                ApplicationNo = entity.ApplicationNo ?? string.Empty,
+                ApplicationStatus = entity.ApplicationStatus ?? string.Empty,
                 StudentName = entity.StudentName ?? string.Empty,
                 FatherName = entity.FatherName ?? string.Empty,
                 MotherName = entity.MotherName ?? string.Empty,
@@ -99,6 +104,7 @@ namespace Students.Api.CORS.Student
                 ReligionName = entity.Religion?.ReligionName ?? string.Empty,
                 CasteName = entity.Caste?.CasteName ?? string.Empty,
                 CategoryName = entity.Category?.CategoryName ?? string.Empty,
+                ClassName = entity.Class?.Name ?? string.Empty,
                 GenderName = entity.Gender?.GenderName ?? string.Empty,
                 BloodGroupName = entity.BloodGroup?.BloodGroupName ?? string.Empty,
                 MaritalStatusName = entity.MaritalStatus?.MaritalStatusName ?? string.Empty,
@@ -114,6 +120,7 @@ namespace Students.Api.CORS.Student
 
                 // Exam details
                 ExamDetails = entity.StudentExamDetails
+                    .Where(e => e.IsActive)
                     .OrderBy(e => e.YearOfPassing)
                     .Select(e => new ExamDetailItemDto
                     {
@@ -127,6 +134,7 @@ namespace Students.Api.CORS.Student
 
                 // Certificates
                 Certificates = entity.StudentCertificates
+                    .Where(c => c.IsActive)
                     .OrderBy(c => c.CertificateId)
                     .Select(c => new CertificateItemDto
                     {

@@ -16,7 +16,7 @@
         //public string? Religion { get; set; }
         public int? ReligionId { get; set; }
         public string? Nationality { get; set; }
-    public int? CasteId { get; set; }
+        public int? CasteId { get; set; }
 
         //public string? BloodGroup { get; set; }
         public int? BloodGroupId { get; set; }
@@ -24,6 +24,7 @@
         //public string? Category { get; set; }
         public int? GenderId { get; set; }
         public int? CategoryId { get; set; }
+        public int? ClassId { get; set; }
 
         public string? IdentificationMark { get; set; }
         public string? GuardianOccupation { get; set; }

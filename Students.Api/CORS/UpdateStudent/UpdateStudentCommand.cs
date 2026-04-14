@@ -1,14 +1,13 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Http;
+using MediatR;
 using Students.Api.DTOs;
 
 namespace Students.Api.CORS.UpdateStudent
 {
     public class UpdateStudentCommand : IRequest<ResponseDto>
     {
-        public StudentUpdateDto Update { get; }
+        public int ApplicationId { get; }
+        public StudentRegistrationDto Registration { get; }
 
-        // Optional new files (agar user replace karna chahe)
         public IFormFile? CasteCertificateFile { get; }
         public IFormFile? SchoolLeavingFile { get; }
         public IFormFile? AdmitCardFile { get; }
@@ -17,7 +16,8 @@ namespace Students.Api.CORS.UpdateStudent
         public IFormFile? PhotoFile { get; }
 
         public UpdateStudentCommand(
-            StudentUpdateDto update,
+            int applicationId,
+            StudentRegistrationDto registration,
             IFormFile? casteCertificateFile,
             IFormFile? schoolLeavingFile,
             IFormFile? admitCardFile,
@@ -25,7 +25,8 @@ namespace Students.Api.CORS.UpdateStudent
             IFormFile? aadhaarFile,
             IFormFile? photoFile)
         {
-            Update = update;
+            ApplicationId = applicationId;
+            Registration = registration;
             CasteCertificateFile = casteCertificateFile;
             SchoolLeavingFile = schoolLeavingFile;
             AdmitCardFile = admitCardFile;

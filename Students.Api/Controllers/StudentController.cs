@@ -28,6 +28,24 @@ namespace Students.Api.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
+        // GET: api/student/applications/by-application-no?applicationNo=AP2026
+        [HttpGet]
+        [Route("applications/by-application-no")]
+        public async Task<IActionResult> GetApplicationsByApplicationNo([FromQuery] string applicationNo)
+        {
+            var result = await _mediator.Send(new GetStudentsByApplicationNoQuery(applicationNo));
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
+        // GET: api/student/applications/by-registration-no?registrationNo=REG001
+        [HttpGet]
+        [Route("applications/by-registration-no")]
+        public async Task<IActionResult> GetApplicationsByRegistrationNo([FromQuery] string registrationNo)
+        {
+            var result = await _mediator.Send(new GetStudentsByRegistrationNoQuery(registrationNo));
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
         // GET: api/student/{id}
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetStudentById(int id)

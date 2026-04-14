@@ -7,6 +7,8 @@ namespace Students.Api.DTOs
     {
         // A. Basic Info
         public int ApplicationId { get; set; }
+        public string ApplicationNo { get; set; } = string.Empty;
+        public string ApplicationStatus { get; set; } = string.Empty;
         public string StudentName { get; set; } = string.Empty;
         public string FatherName { get; set; } = string.Empty;
         public string MotherName { get; set; } = string.Empty;
@@ -20,6 +22,7 @@ namespace Students.Api.DTOs
         public string ReligionName { get; set; } = string.Empty;
         public string CasteName { get; set; } = string.Empty;
         public string CategoryName { get; set; } = string.Empty;
+        public string ClassName { get; set; } = string.Empty;
         public string GenderName { get; set; } = string.Empty;
         public string BloodGroupName { get; set; } = string.Empty;
         public string MaritalStatusName { get; set; } = string.Empty;

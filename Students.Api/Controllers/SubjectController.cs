@@ -26,6 +26,15 @@ namespace Students.Api.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
+        // GET: api/Subject/Classes
+        [HttpGet]
+        [Route("Classes")]
+        public async Task<IActionResult> GetClasses()
+        {
+            var result = await _mediator.Send(new GetClassesQuery());
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
         // GET: api/Subject/OptionalByFaculty/2
         [HttpGet]
         [Route("OptionalByFaculty/{facultyId:int}")]

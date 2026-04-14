@@ -53,11 +53,23 @@ public partial class StudentApplication
 
     public string? ApplicationStatus { get; set; }
 
+    public int? ClassId { get; set; }
+
+    public int? CreatedBy { get; set; }
+
+    public DateTime? ModifiedDate { get; set; }
+
+    public int? ModifiedBy { get; set; }
+
+    public bool IsActive { get; set; }
+
     public virtual BloodGroup? BloodGroup { get; set; }
 
     public virtual Caste? Caste { get; set; }
 
     public virtual Category? Category { get; set; }
+
+    public virtual ClassMaster? Class { get; set; }
 
     public virtual Gender? Gender { get; set; }
 

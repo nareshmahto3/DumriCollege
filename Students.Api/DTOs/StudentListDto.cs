@@ -3,11 +3,15 @@
     public class StudentListDto
     {
         public int ApplicationId { get; set; }
-        public string StudentName { get; set; } = string.Empty;
+        public string ApplicationNo { get; set; } = string.Empty;
         public string RegistrationNo { get; set; } = string.Empty;
+        public string StudentName { get; set; } = string.Empty;
+        public string ClassName { get; set; } = string.Empty;
+        public string ApplicationStatus { get; set; } = string.Empty;
+        public string Gender { get; set; } = string.Empty;
+
         public string MobileNumber { get; set; } = string.Empty;
         public string? StudentId { get; set; }
-        public string Gender { get; set; } = string.Empty;   // shown in list
         public string Status { get; set; } = string.Empty;
         public DateTime? CreatedDate { get; set; }
     }

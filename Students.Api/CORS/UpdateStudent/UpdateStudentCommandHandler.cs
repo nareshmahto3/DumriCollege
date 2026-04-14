@@ -1,4 +1,4 @@
-﻿using LibraryService.Utility.Data.Core.Interfaces;
+using LibraryService.Utility.Data.Core.Interfaces;
 using MediatR;
 using Students.Api.DbEntities;
 using Students.Api.DTOs;
@@ -6,8 +6,7 @@ using Students.Api.Helpers;
 
 namespace Students.Api.CORS.UpdateStudent
 {
-    public class UpdateStudentCommandHandler
-        : IRequestHandler<UpdateStudentCommand, ResponseDto>
+    public class UpdateStudentCommandHandler : IRequestHandler<UpdateStudentCommand, ResponseDto>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _env;
@@ -20,21 +19,29 @@ namespace Students.Api.CORS.UpdateStudent
 
         public async Task<ResponseDto> Handle(UpdateStudentCommand request, CancellationToken cancellationToken)
         {
-            var dto = request.Update;
+            if (request.ApplicationId <= 0)
+                return ResponseDto.Fail("ApplicationId is required.");
+
+            var dto = request.Registration;
             if (dto == null)
-                return ResponseDto.Fail("Update data is null");
+                return ResponseDto.Fail("Registration data is null");
 
             var appRepo = _unitOfWork.Repository<StudentApplication>();
             var subjectSelectionRepo = _unitOfWork.Repository<StudentSubjectSelection>();
             var examRepo = _unitOfWork.Repository<StudentExamDetail>();
             var certRepo = _unitOfWork.Repository<StudentCertificate>();
+            var verRepo = _unitOfWork.Repository<StudentDocumentVerification>();
 
-            // 1) Existing application load
-            var application = await appRepo.GetByIdAsync(dto.ApplicationId);
-            if (application == null)
+            var facultyRepo = _unitOfWork.Repository<Faculty>();
+            var optionalRepo = _unitOfWork.Repository<OptionalSubject>();
+            var compRepo = _unitOfWork.Repository<CompulsorySubject>();
+            var addRepo = _unitOfWork.Repository<AdditionalSubject>();
+            var classRepo = _unitOfWork.Repository<ClassMaster>();
+
+            var application = await appRepo.GetByIdAsync(request.ApplicationId);
+            if (application == null || !application.IsActive)
                 return ResponseDto.Fail("Application not found");
 
-            // 2) Parse DOB (optional)
             DateOnly? dob = application.DateOfBirth;
             if (!string.IsNullOrWhiteSpace(dto.DateOfBirth))
             {
@@ -43,7 +50,6 @@ namespace Students.Api.CORS.UpdateStudent
                 dob = parsedDob;
             }
 
-            // 3) Parse certificate issue date (optional, if you want)
             DateOnly? certIssueDate = null;
             if (!string.IsNullOrWhiteSpace(dto.IssueDate))
             {
@@ -52,101 +58,149 @@ namespace Students.Api.CORS.UpdateStudent
                 certIssueDate = parsedIssue;
             }
 
-            // 4) Update basic fields (only if values provided)
-            if (!string.IsNullOrWhiteSpace(dto.StudentName))
-                application.StudentName = dto.StudentName;
+            var existingSelection = (await subjectSelectionRepo.GetAllAsync())
+                .FirstOrDefault(x => x.ApplicationId == application.ApplicationId && x.IsActive);
 
-            if (!string.IsNullOrWhiteSpace(dto.FatherName))
-                application.FatherName = dto.FatherName;
+            var targetFacultyId = dto.FacultyId > 0 ? dto.FacultyId : (existingSelection?.FacultyId ?? 0);
+            var targetCompulsorySubjectId = dto.CompulsorySubjectId > 0 ? dto.CompulsorySubjectId : (existingSelection?.CompulsorySubjectId ?? 0);
 
-            if (!string.IsNullOrWhiteSpace(dto.MotherName))
-                application.MotherName = dto.MotherName;
+            if (targetFacultyId > 0)
+            {
+                var faculty = await facultyRepo.GetByIdAsync(targetFacultyId);
+                if (faculty == null)
+                    return ResponseDto.Fail("Invalid FacultyId");
+            }
 
-            if (!string.IsNullOrWhiteSpace(dto.PermanentAddress))
-                application.PermanentAddress = dto.PermanentAddress;
+            if (targetCompulsorySubjectId > 0)
+            {
+                var compulsory = await compRepo.GetByIdAsync(targetCompulsorySubjectId);
+                if (compulsory == null)
+                    return ResponseDto.Fail("Invalid CompulsorySubjectId");
+            }
 
-            if (!string.IsNullOrWhiteSpace(dto.LocalAddress))
-                application.LocalAddress = dto.LocalAddress;
+            if (dto.ClassId.HasValue)
+            {
+                var classMaster = await classRepo.GetByIdAsync(dto.ClassId.Value);
+                if (classMaster == null)
+                    return ResponseDto.Fail("Invalid ClassId");
+            }
+
+            var optionalIds = new[] { dto.OptionalSubject1Id, dto.OptionalSubject2Id, dto.OptionalSubject3Id }
+                .Where(x => x.HasValue)
+                .Select(x => x.Value)
+                .ToList();
+
+            if (targetFacultyId > 0)
+            {
+                int maxOptional;
+                switch (targetFacultyId)
+                {
+                    case 2:
+                        maxOptional = 2;
+                        break;
+                    case 1:
+                        maxOptional = 3;
+                        break;
+                    case 3:
+                        maxOptional = 2;
+                        break;
+                    default:
+                        return ResponseDto.Fail("Unsupported FacultyId");
+                }
+
+                if (optionalIds.Count > maxOptional)
+                    return ResponseDto.Fail($"You can select at most {maxOptional} optional subjects for this faculty.");
+
+                if (optionalIds.Any())
+                {
+                    var allOptionals = await optionalRepo.GetAllAsync();
+                    var invalid = allOptionals
+                        .Where(o => optionalIds.Contains(o.OptionalSubjectId))
+                        .Any(o => o.FacultyId != targetFacultyId);
+
+                    if (invalid)
+                        return ResponseDto.Fail("One or more optional subjects do not belong to the chosen faculty.");
+                }
+            }
+
+            if (dto.AdditionalSubjectId.HasValue)
+            {
+                var addSub = await addRepo.GetByIdAsync(dto.AdditionalSubjectId.Value);
+                if (addSub == null)
+                    return ResponseDto.Fail("Invalid AdditionalSubjectId");
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.StudentName)) application.StudentName = dto.StudentName;
+            if (!string.IsNullOrWhiteSpace(dto.FatherName)) application.FatherName = dto.FatherName;
+            if (!string.IsNullOrWhiteSpace(dto.MotherName)) application.MotherName = dto.MotherName;
+            if (!string.IsNullOrWhiteSpace(dto.PermanentAddress)) application.PermanentAddress = dto.PermanentAddress;
+            if (!string.IsNullOrWhiteSpace(dto.LocalAddress)) application.LocalAddress = dto.LocalAddress;
 
             application.DateOfBirth = dob;
 
-            if (dto.ReligionId.HasValue)
-                application.ReligionId = dto.ReligionId;
+            if (dto.ReligionId.HasValue) application.ReligionId = dto.ReligionId;
+            if (!string.IsNullOrWhiteSpace(dto.Nationality)) application.Nationality = dto.Nationality;
+            if (dto.CasteId.HasValue) application.CasteId = dto.CasteId;
+            if (dto.BloodGroupId.HasValue) application.BloodGroupId = dto.BloodGroupId;
+            if (dto.GenderId.HasValue) application.GenderId = dto.GenderId;
+            if (dto.CategoryId.HasValue) application.CategoryId = dto.CategoryId;
+            if (dto.ClassId.HasValue) application.ClassId = dto.ClassId;
+            if (!string.IsNullOrWhiteSpace(dto.IdentificationMark)) application.IdentificationMark = dto.IdentificationMark;
+            if (!string.IsNullOrWhiteSpace(dto.GuardianOccupation)) application.GuardianOccupation = dto.GuardianOccupation;
+            if (dto.MaritalStatusId.HasValue) application.MaritalStatusId = dto.MaritalStatusId;
+            if (!string.IsNullOrWhiteSpace(dto.AadhaarNumber)) application.AadhaarNumber = dto.AadhaarNumber;
+            if (!string.IsNullOrWhiteSpace(dto.MobileNumber)) application.MobileNumber = dto.MobileNumber;
+            if (!string.IsNullOrWhiteSpace(dto.Height)) application.Height = dto.Height;
+            if (!string.IsNullOrWhiteSpace(dto.Weight)) application.Weight = dto.Weight;
 
-            if (!string.IsNullOrWhiteSpace(dto.Nationality))
-                application.Nationality = dto.Nationality;
+            application.ModifiedDate = DateTime.Now;
+            application.ModifiedBy = 0;
+            application.IsActive = true;
 
-            if (dto.CasteId.HasValue)
-                application.CasteId = dto.CasteId;
-
-            if (dto.BloodGroupId.HasValue)
-                application.BloodGroupId = dto.BloodGroupId;
-
-            if (dto.GenderId.HasValue)
-                application.GenderId = dto.GenderId;
-
-            if (dto.CategoryId.HasValue)
-                application.CategoryId = dto.CategoryId;
-
-            if (!string.IsNullOrWhiteSpace(dto.IdentificationMark))
-                application.IdentificationMark = dto.IdentificationMark;
-
-            if (!string.IsNullOrWhiteSpace(dto.GuardianOccupation))
-                application.GuardianOccupation = dto.GuardianOccupation;
-
-            if (dto.MaritalStatusId.HasValue)
-                application.MaritalStatusId = dto.MaritalStatusId;
-
-            if (!string.IsNullOrWhiteSpace(dto.AadhaarNumber))
-                application.AadhaarNumber = dto.AadhaarNumber;
-
-            if (!string.IsNullOrWhiteSpace(dto.MobileNumber))
-                application.MobileNumber = dto.MobileNumber;
-
-            if (!string.IsNullOrWhiteSpace(dto.Height))
-                application.Height = dto.Height;
-
-            if (!string.IsNullOrWhiteSpace(dto.Weight))
-                application.Weight = dto.Weight;
-
-            // 5) Subject update (optional)
-            StudentSubjectSelection? subjectSelection = null;
-
-            var existingSelectionList = await subjectSelectionRepo.GetAllAsync();
-            subjectSelection = existingSelectionList
-                .FirstOrDefault(x => x.ApplicationId == application.ApplicationId);
-
-            if (subjectSelection != null)
+            if (existingSelection == null)
             {
-                if (dto.FacultyId.HasValue)
-                    subjectSelection.FacultyId = dto.FacultyId.Value;
+                if (targetFacultyId > 0 && targetCompulsorySubjectId > 0)
+                {
+                    await subjectSelectionRepo.AddAsync(new StudentSubjectSelection
+                    {
+                        ApplicationId = application.ApplicationId,
+                        FacultyId = targetFacultyId,
+                        CompulsorySubjectId = targetCompulsorySubjectId,
+                        OptionalSubject1 = dto.OptionalSubject1Id,
+                        OptionalSubject2 = dto.OptionalSubject2Id,
+                        OptionalSubject3 = dto.OptionalSubject3Id,
+                        AdditionalSubjectId = dto.AdditionalSubjectId,
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = 0,
+                        IsActive = true
+                    });
+                }
+            }
+            else
+            {
+                if (dto.FacultyId > 0) existingSelection.FacultyId = dto.FacultyId;
+                if (dto.CompulsorySubjectId > 0) existingSelection.CompulsorySubjectId = dto.CompulsorySubjectId;
+                if (dto.OptionalSubject1Id.HasValue) existingSelection.OptionalSubject1 = dto.OptionalSubject1Id;
+                if (dto.OptionalSubject2Id.HasValue) existingSelection.OptionalSubject2 = dto.OptionalSubject2Id;
+                if (dto.OptionalSubject3Id.HasValue) existingSelection.OptionalSubject3 = dto.OptionalSubject3Id;
+                if (dto.AdditionalSubjectId.HasValue) existingSelection.AdditionalSubjectId = dto.AdditionalSubjectId;
 
-                if (dto.CompulsorySubjectId.HasValue)
-                    subjectSelection.CompulsorySubjectId = dto.CompulsorySubjectId.Value;
-
-                if (dto.OptionalSubject1Id.HasValue)
-                    subjectSelection.OptionalSubject1 = dto.OptionalSubject1Id;
-
-                if (dto.OptionalSubject2Id.HasValue)
-                    subjectSelection.OptionalSubject2 = dto.OptionalSubject2Id;
-
-                if (dto.OptionalSubject3Id.HasValue)
-                    subjectSelection.OptionalSubject3 = dto.OptionalSubject3Id;
-
-                if (dto.AdditionalSubjectId.HasValue)
-                    subjectSelection.AdditionalSubjectId = dto.AdditionalSubjectId;
+                existingSelection.ModifiedDate = DateTime.Now;
+                existingSelection.ModifiedBy = 0;
+                existingSelection.IsActive = true;
             }
 
-            // 6) Update exam details (simple: delete old, insert new if provided)
             if (!string.IsNullOrWhiteSpace(dto.ExamDetails))
             {
                 var existingExams = (await examRepo.GetAllAsync())
-                    .Where(e => e.ApplicationId == application.ApplicationId)
+                    .Where(e => e.ApplicationId == application.ApplicationId && e.IsActive)
                     .ToList();
 
                 foreach (var ex in existingExams)
                 {
-                    examRepo.Remove(ex);
+                    ex.IsActive = false;
+                    ex.ModifiedDate = DateTime.Now;
+                    ex.ModifiedBy = 0;
                 }
 
                 var examList = System.Text.Json.JsonSerializer.Deserialize<List<ExamDetailDto>>(
@@ -157,7 +211,7 @@ namespace Students.Api.CORS.UpdateStudent
                 {
                     foreach (var exam in examList)
                     {
-                        var examDetail = new StudentExamDetail
+                        await examRepo.AddAsync(new StudentExamDetail
                         {
                             ApplicationId = application.ApplicationId,
                             SchoolCollege = exam.SchoolCollege,
@@ -165,35 +219,32 @@ namespace Students.Api.CORS.UpdateStudent
                             ExamName = exam.ExamName,
                             YearOfPassing = int.TryParse(exam.YearOfPassing, out var year) ? year : (int?)null,
                             DivisionOrRank = exam.DivisionOrRank,
-                            Subjects = exam.Subjects
-                        };
-
-                        await examRepo.AddAsync(examDetail);
+                            Subjects = exam.Subjects,
+                            CreatedDate = DateTime.Now,
+                            CreatedBy = 0,
+                            IsActive = true
+                        });
                     }
                 }
             }
 
-            // 7) Files update (optional - only if new file provided)
             const long maxFileSize = 5 * 1024 * 1024;
-
             async Task<string?> SaveIfProvided(IFormFile? file, string folder)
             {
-                if (file == null)
-                    return null;
+                if (file == null) return null;
 
                 var result = await FileStorageHelper.SaveFileAsync(file, folder, maxFileSize, _env, cancellationToken);
-                if (!result.Ok)
-                    throw new Exception(result.Error);
+                if (!result.Ok) throw new Exception(result.Error);
 
                 return result.SavedPath;
             }
 
-            string? newCastePath = null;
-            string? newSlcPath = null;
-            string? newAdmitPath = null;
-            string? newMarksheetPath = null;
-            string? newAadhaarPath = null;
-            string? newPhotoPath = null;
+            string? newCastePath;
+            string? newSlcPath;
+            string? newAdmitPath;
+            string? newMarksheetPath;
+            string? newAadhaarPath;
+            string? newPhotoPath;
 
             try
             {
@@ -209,54 +260,115 @@ namespace Students.Api.CORS.UpdateStudent
                 return ResponseDto.Fail(ex.Message);
             }
 
-            // 8) Certificate meta update + new file records, if any
-            if (!string.IsNullOrWhiteSpace(dto.CertificateNumber))
-            {
-                // Update existing certificate meta (if you want full logic, we can expand this)
-                var existingCerts = (await certRepo.GetAllAsync())
-                    .Where(c => c.ApplicationId == application.ApplicationId)
-                    .ToList();
+            var existingCerts = (await certRepo.GetAllAsync())
+                .Where(c => c.ApplicationId == application.ApplicationId && c.IsActive)
+                .ToList();
 
-                foreach (var c in existingCerts)
+            var existingVerifications = (await verRepo.GetAllAsync())
+                .Where(v => v.ApplicationId == application.ApplicationId && v.IsActive)
+                .ToList();
+
+            async Task UpsertCertificateAndVerification(string type, string? newPath)
+            {
+                var cert = existingCerts.FirstOrDefault(c => string.Equals(c.CertificateType, type, StringComparison.OrdinalIgnoreCase));
+
+                if (cert == null)
                 {
-                    c.CertificateNumber = dto.CertificateNumber;
-                    c.IssueDate = certIssueDate ?? c.IssueDate;
-                    if (!string.IsNullOrWhiteSpace(dto.IssuedBy))
-                        c.IssuedBy = dto.IssuedBy;
+                    if (string.IsNullOrWhiteSpace(newPath))
+                        return;
+
+                    cert = new StudentCertificate
+                    {
+                        ApplicationId = application.ApplicationId,
+                        CertificateType = type,
+                        CertificateNumber = dto.CertificateNumber,
+                        IssueDate = certIssueDate,
+                        IssuedBy = dto.IssuedBy,
+                        FilePath = newPath,
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = 0,
+                        IsActive = true
+                    };
+
+                    await certRepo.AddAsync(cert);
+                    await _unitOfWork.SaveChangesAsync();
+
+                    await verRepo.AddAsync(new StudentDocumentVerification
+                    {
+                        ApplicationId = application.ApplicationId,
+                        CertificateId = cert.CertificateId,
+                        DocumentType = type,
+                        Status = "Pending",
+                        RejectReason = null,
+                        IsActive = true,
+                        Version = 1,
+                        VerifiedDate = null,
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = 0
+                    });
+
+                    return;
+                }
+
+                if (!string.IsNullOrWhiteSpace(dto.CertificateNumber)) cert.CertificateNumber = dto.CertificateNumber;
+                if (certIssueDate.HasValue) cert.IssueDate = certIssueDate;
+                if (!string.IsNullOrWhiteSpace(dto.IssuedBy)) cert.IssuedBy = dto.IssuedBy;
+
+                var uploadedNewFile = !string.IsNullOrWhiteSpace(newPath);
+                if (uploadedNewFile) cert.FilePath = newPath;
+
+                cert.ModifiedDate = DateTime.Now;
+                cert.ModifiedBy = 0;
+                cert.IsActive = true;
+
+                var verification = existingVerifications.FirstOrDefault(v => v.CertificateId == cert.CertificateId);
+                if (verification == null)
+                {
+                    await verRepo.AddAsync(new StudentDocumentVerification
+                    {
+                        ApplicationId = application.ApplicationId,
+                        CertificateId = cert.CertificateId,
+                        DocumentType = type,
+                        Status = "Pending",
+                        RejectReason = null,
+                        IsActive = true,
+                        Version = 1,
+                        VerifiedDate = null,
+                        CreatedDate = DateTime.Now,
+                        CreatedBy = 0
+                    });
+                }
+                else
+                {
+                    verification.DocumentType = type;
+                    verification.IsActive = true;
+                    verification.ModifiedDate = DateTime.Now;
+                    verification.ModifiedBy = 0;
+
+                    if (uploadedNewFile)
+                    {
+                        verification.Status = "Pending";
+                        verification.RejectReason = null;
+                        verification.VerifiedDate = null;
+                        verification.Version = verification.Version + 1;
+                    }
                 }
             }
 
-            async Task AddCertIfNewFile(string type, string? newPath)
-            {
-                if (string.IsNullOrEmpty(newPath))
-                    return;
+            await UpsertCertificateAndVerification("Caste Certificate", newCastePath);
+            await UpsertCertificateAndVerification("School Leaving Certificate", newSlcPath);
+            await UpsertCertificateAndVerification("Admit Card", newAdmitPath);
+            await UpsertCertificateAndVerification("Marksheet", newMarksheetPath);
+            await UpsertCertificateAndVerification("Aadhaar Card", newAadhaarPath);
+            await UpsertCertificateAndVerification("Profile Photo", newPhotoPath);
 
-                await certRepo.AddAsync(new StudentCertificate
-                {
-                    ApplicationId = application.ApplicationId,
-                    CertificateType = type,
-                    CertificateNumber = dto.CertificateNumber,
-                    IssueDate = certIssueDate,
-                    IssuedBy = dto.IssuedBy,
-                    FilePath = newPath,
-                    CreatedDate = DateTime.Now
-                });
-            }
-
-            await AddCertIfNewFile("Caste Certificate", newCastePath);
-            await AddCertIfNewFile("School Leaving Certificate", newSlcPath);
-            await AddCertIfNewFile("Admit Card", newAdmitPath);
-            await AddCertIfNewFile("Marksheet", newMarksheetPath);
-            await AddCertIfNewFile("Aadhaar Card", newAadhaarPath);
-            await AddCertIfNewFile("Profile Photo", newPhotoPath);
-
-            // 9) Save all changes
             await _unitOfWork.SaveChangesAsync();
 
             return ResponseDto.Success(
                 new
                 {
                     application.ApplicationId,
+                    application.ApplicationNo,
                     application.RegistrationNo,
                     application.StudentName
                 },

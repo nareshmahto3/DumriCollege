@@ -24,6 +24,8 @@ public partial class StudentDbContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
+    public virtual DbSet<ClassMaster> ClassMasters { get; set; }
+
     public virtual DbSet<CompulsorySubject> CompulsorySubjects { get; set; }
 
     public virtual DbSet<Faculty> Faculties { get; set; }
@@ -50,7 +52,7 @@ public partial class StudentDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=DESKTOP-O75AL38;Database=dumrideep;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=Deep\\SQLEXPRESS;Database=dumrideep;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -80,6 +82,15 @@ public partial class StudentDbContext : DbContext
             entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A0BB021A1CF");
 
             entity.Property(e => e.CategoryName).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<ClassMaster>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__ClassMas__3214EC07B5C825E3");
+
+            entity.ToTable("ClassMaster");
+
+            entity.Property(e => e.Name).HasMaxLength(50);
         });
 
         modelBuilder.Entity<CompulsorySubject>(entity =>
@@ -157,8 +168,10 @@ public partial class StudentDbContext : DbContext
             entity.Property(e => e.GuardianOccupation).HasMaxLength(200);
             entity.Property(e => e.Height).HasMaxLength(10);
             entity.Property(e => e.IdentificationMark).HasMaxLength(200);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.LocalAddress).HasMaxLength(300);
             entity.Property(e => e.MobileNumber).HasMaxLength(20);
+            entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
             entity.Property(e => e.MotherName).HasMaxLength(100);
             entity.Property(e => e.Nationality).HasMaxLength(50);
             entity.Property(e => e.PermanentAddress).HasMaxLength(300);
@@ -177,6 +190,10 @@ public partial class StudentDbContext : DbContext
             entity.HasOne(d => d.Category).WithMany(p => p.StudentApplications)
                 .HasForeignKey(d => d.CategoryId)
                 .HasConstraintName("FK_StudentApplication_Categories");
+
+            entity.HasOne(d => d.Class).WithMany(p => p.StudentApplications)
+                .HasForeignKey(d => d.ClassId)
+                .HasConstraintName("FK_StudentApplication_Class");
 
             entity.HasOne(d => d.Gender).WithMany(p => p.StudentApplications)
                 .HasForeignKey(d => d.GenderId)
@@ -201,7 +218,9 @@ public partial class StudentDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.FilePath).HasMaxLength(300);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IssuedBy).HasMaxLength(200);
+            entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
 
             entity.HasOne(d => d.Application).WithMany(p => p.StudentCertificates)
                 .HasForeignKey(d => d.ApplicationId)
@@ -219,6 +238,7 @@ public partial class StudentDbContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.DocumentType).HasMaxLength(100);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
             entity.Property(e => e.RejectReason).HasMaxLength(500);
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
@@ -242,8 +262,13 @@ public partial class StudentDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__StudentE__3214EC079332A8E1");
 
             entity.Property(e => e.BoardCouncil).HasMaxLength(200);
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
             entity.Property(e => e.DivisionOrRank).HasMaxLength(50);
             entity.Property(e => e.ExamName).HasMaxLength(100);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
             entity.Property(e => e.SchoolCollege).HasMaxLength(200);
             entity.Property(e => e.Subjects).HasMaxLength(200);
 
@@ -257,6 +282,12 @@ public partial class StudentDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__StudentS__3214EC0729DE1A78");
 
             entity.ToTable("StudentSubjectSelection");
+
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
 
             entity.HasOne(d => d.AdditionalSubject).WithMany(p => p.StudentSubjectSelections)
                 .HasForeignKey(d => d.AdditionalSubjectId)

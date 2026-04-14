@@ -24,7 +24,6 @@ namespace Students.Api.CORS.RegisterStudent
             if (dto == null)
                 return ResponseDto.Fail("Registration data is null");
 
-            // 1) Parse dates
             DateOnly? dob = null;
             if (!string.IsNullOrWhiteSpace(dto.DateOfBirth))
             {
@@ -41,11 +40,11 @@ namespace Students.Api.CORS.RegisterStudent
                 certIssueDate = parsedIssue;
             }
 
-            // 2) Subject rules based on Faculty
             var facultyRepo = _unitOfWork.Repository<Faculty>();
             var optionalRepo = _unitOfWork.Repository<OptionalSubject>();
             var compRepo = _unitOfWork.Repository<CompulsorySubject>();
             var addRepo = _unitOfWork.Repository<AdditionalSubject>();
+            var classRepo = _unitOfWork.Repository<ClassMaster>();
 
             var faculty = await facultyRepo.GetByIdAsync(dto.FacultyId);
             if (faculty == null)
@@ -55,28 +54,30 @@ namespace Students.Api.CORS.RegisterStudent
             if (compulsory == null)
                 return ResponseDto.Fail("Invalid CompulsorySubjectId");
 
+            if (dto.ClassId.HasValue)
+            {
+                var classMaster = await classRepo.GetByIdAsync(dto.ClassId.Value);
+                if (classMaster == null)
+                    return ResponseDto.Fail("Invalid ClassId");
+            }
+
             int maxOptional;
             switch (dto.FacultyId)
             {
-                case 2: // Science
+                case 2:
                     maxOptional = 2;
                     break;
-                case 1: // Arts
+                case 1:
                     maxOptional = 3;
                     break;
-                case 3: // Commerce
+                case 3:
                     maxOptional = 2;
                     break;
                 default:
                     return ResponseDto.Fail("Unsupported FacultyId");
             }
 
-            var optionalIds = new[]
-                {
-                    dto.OptionalSubject1Id,
-                    dto.OptionalSubject2Id,
-                    dto.OptionalSubject3Id
-                }
+            var optionalIds = new[] { dto.OptionalSubject1Id, dto.OptionalSubject2Id, dto.OptionalSubject3Id }
                 .Where(x => x.HasValue)
                 .Select(x => x.Value)
                 .ToList();
@@ -102,55 +103,38 @@ namespace Students.Api.CORS.RegisterStudent
                     return ResponseDto.Fail("Invalid AdditionalSubjectId");
             }
 
-            // 3) Save files
             const long maxFileSize = 5 * 1024 * 1024;
 
-            var casteResult = await FileStorageHelper.SaveFileAsync(
-                request.CasteCertificateFile, "docs", maxFileSize, _env, cancellationToken);
+            var casteResult = await FileStorageHelper.SaveFileAsync(request.CasteCertificateFile, "docs", maxFileSize, _env, cancellationToken);
             if (!casteResult.Ok) return ResponseDto.Fail(casteResult.Error!);
 
-            var slcResult = await FileStorageHelper.SaveFileAsync(
-                request.SchoolLeavingFile, "docs", maxFileSize, _env, cancellationToken);
+            var slcResult = await FileStorageHelper.SaveFileAsync(request.SchoolLeavingFile, "docs", maxFileSize, _env, cancellationToken);
             if (!slcResult.Ok) return ResponseDto.Fail(slcResult.Error!);
 
-            var admitResult = await FileStorageHelper.SaveFileAsync(
-                request.AdmitCardFile, "docs", maxFileSize, _env, cancellationToken);
+            var admitResult = await FileStorageHelper.SaveFileAsync(request.AdmitCardFile, "docs", maxFileSize, _env, cancellationToken);
             if (!admitResult.Ok) return ResponseDto.Fail(admitResult.Error!);
 
-            var marksheetResult = await FileStorageHelper.SaveFileAsync(
-                request.MarksheetFile, "docs", maxFileSize, _env, cancellationToken);
+            var marksheetResult = await FileStorageHelper.SaveFileAsync(request.MarksheetFile, "docs", maxFileSize, _env, cancellationToken);
             if (!marksheetResult.Ok) return ResponseDto.Fail(marksheetResult.Error!);
 
-            var aadhaarResult = await FileStorageHelper.SaveFileAsync(
-                request.AadhaarFile, "docs", maxFileSize, _env, cancellationToken);
+            var aadhaarResult = await FileStorageHelper.SaveFileAsync(request.AadhaarFile, "docs", maxFileSize, _env, cancellationToken);
             if (!aadhaarResult.Ok) return ResponseDto.Fail(aadhaarResult.Error!);
 
-            var photoResult = await FileStorageHelper.SaveFileAsync(
-                request.PhotoFile, "photos", maxFileSize, _env, cancellationToken);
+            var photoResult = await FileStorageHelper.SaveFileAsync(request.PhotoFile, "photos", maxFileSize, _env, cancellationToken);
             if (!photoResult.Ok) return ResponseDto.Fail(photoResult.Error!);
 
-            // 4) Generate unique ApplicationNo and create StudentApplication
             var appRepo = _unitOfWork.Repository<StudentApplication>();
 
-            // ApplicationNo format: AP{AdmissionYear}{Sequence}
-            // Example: AP2026001
             var admissionYear = DateTime.UtcNow.Year;
-
-            // Load all applications once (you are already doing similar for other logic)
             var allApps = await appRepo.GetAllAsync();
-
-            // Find max sequence for current year
-            // Assumes existing ApplicationNo starts with "AP{year}" and then 3-digit sequence
             var yearPrefix = $"AP{admissionYear}";
             var yearApps = allApps
-                .Where(a => a.ApplicationNo != null &&
-                            a.ApplicationNo.StartsWith(yearPrefix, StringComparison.OrdinalIgnoreCase))
+                .Where(a => a.ApplicationNo != null && a.ApplicationNo.StartsWith(yearPrefix, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            int nextSequence = 1;
+            var nextSequence = 1;
             if (yearApps.Any())
             {
-                // Extract numeric tail and get max; be defensive against bad data
                 var maxSeq = yearApps
                     .Select(a =>
                     {
@@ -164,26 +148,24 @@ namespace Students.Api.CORS.RegisterStudent
 
             var generatedAppNo = $"{yearPrefix}{nextSequence:D3}";
 
+            var now = DateTime.Now;
             var application = new StudentApplication
             {
                 StudentName = dto.StudentName,
                 FatherName = dto.FatherName,
                 MotherName = dto.MotherName,
-
-                // Do NOT set RegistrationNo here
                 ApplicationNo = generatedAppNo,
                 ApplicationStatus = "Pending",
-
                 PermanentAddress = dto.PermanentAddress,
                 LocalAddress = dto.LocalAddress,
                 DateOfBirth = dob,
-
                 ReligionId = dto.ReligionId,
                 Nationality = dto.Nationality,
                 CasteId = dto.CasteId,
                 BloodGroupId = dto.BloodGroupId,
                 GenderId = dto.GenderId,
                 CategoryId = dto.CategoryId,
+                ClassId = dto.ClassId,
                 IdentificationMark = dto.IdentificationMark,
                 GuardianOccupation = dto.GuardianOccupation,
                 MaritalStatusId = dto.MaritalStatusId,
@@ -191,15 +173,15 @@ namespace Students.Api.CORS.RegisterStudent
                 MobileNumber = dto.MobileNumber,
                 Height = dto.Height,
                 Weight = dto.Weight,
-                CreatedDate = DateTime.Now
+                CreatedDate = now,
+                CreatedBy = 0,
+                IsActive = true
             };
 
             await appRepo.AddAsync(application);
             await _unitOfWork.SaveChangesAsync();
 
-            // 5) StudentSubjectSelection
             var subjectSelectionRepo = _unitOfWork.Repository<StudentSubjectSelection>();
-
             var subjectSelection = new StudentSubjectSelection
             {
                 ApplicationId = application.ApplicationId,
@@ -208,39 +190,25 @@ namespace Students.Api.CORS.RegisterStudent
                 OptionalSubject1 = dto.OptionalSubject1Id,
                 OptionalSubject2 = dto.OptionalSubject2Id,
                 OptionalSubject3 = dto.OptionalSubject3Id,
-                AdditionalSubjectId = dto.AdditionalSubjectId
+                AdditionalSubjectId = dto.AdditionalSubjectId,
+                CreatedDate = now,
+                CreatedBy = 0,
+                IsActive = true
             };
-
             await subjectSelectionRepo.AddAsync(subjectSelection);
 
-            // 6) StudentExamDetail
-            //var examRepo = _unitOfWork.Repository<StudentExamDetail>();
-
-            //var examDetail = new StudentExamDetail
-            //{
-            //    ApplicationId = application.ApplicationId,
-            //    SchoolCollege = dto.SchoolCollege,
-            //    BoardCouncil = dto.BoardCouncil,
-            //    ExamName = dto.ExamName,
-            //    YearOfPassing = dto.YearOfPassing,
-            //    DivisionOrRank = dto.DivisionOrRank,
-            //    Subjects = dto.Subjects
-            //};
-            // 6) StudentExamDetail — save multiple exam records
             var examRepo = _unitOfWork.Repository<StudentExamDetail>();
-
             if (!string.IsNullOrWhiteSpace(dto.ExamDetails))
             {
                 var examList = System.Text.Json.JsonSerializer.Deserialize<List<ExamDetailDto>>(
                     dto.ExamDetails,
-                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-                );
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 if (examList != null)
                 {
                     foreach (var exam in examList)
                     {
-                        var examDetail = new StudentExamDetail
+                        await examRepo.AddAsync(new StudentExamDetail
                         {
                             ApplicationId = application.ApplicationId,
                             SchoolCollege = exam.SchoolCollege,
@@ -248,15 +216,15 @@ namespace Students.Api.CORS.RegisterStudent
                             ExamName = exam.ExamName,
                             YearOfPassing = int.TryParse(exam.YearOfPassing, out var year) ? year : (int?)null,
                             DivisionOrRank = exam.DivisionOrRank,
-                            Subjects = exam.Subjects
-                        };
-
-                        await examRepo.AddAsync(examDetail);
+                            Subjects = exam.Subjects,
+                            CreatedDate = now,
+                            CreatedBy = 0,
+                            IsActive = true
+                        });
                     }
                 }
             }
 
-            // 7) StudentCertificate + StudentDocumentVerification — save and create pending verification
             var certRepo = _unitOfWork.Repository<StudentCertificate>();
             var verRepo = _unitOfWork.Repository<StudentDocumentVerification>();
 
@@ -273,13 +241,15 @@ namespace Students.Api.CORS.RegisterStudent
                     IssueDate = certIssueDate,
                     IssuedBy = dto.IssuedBy,
                     FilePath = path,
-                    CreatedDate = DateTime.Now
+                    CreatedDate = now,
+                    CreatedBy = 0,
+                    IsActive = true
                 };
 
                 await certRepo.AddAsync(certificate);
-                await _unitOfWork.SaveChangesAsync(); // ensure CertificateId is set
+                await _unitOfWork.SaveChangesAsync();
 
-                var verification = new StudentDocumentVerification
+                await verRepo.AddAsync(new StudentDocumentVerification
                 {
                     ApplicationId = application.ApplicationId,
                     CertificateId = certificate.CertificateId,
@@ -289,10 +259,9 @@ namespace Students.Api.CORS.RegisterStudent
                     IsActive = true,
                     Version = 1,
                     VerifiedDate = null,
-                    CreatedDate = DateTime.Now
-                };
-
-                await verRepo.AddAsync(verification);
+                    CreatedDate = now,
+                    CreatedBy = 0
+                });
             }
 
             await SaveCertificateWithVerification("Caste Certificate", casteResult.SavedPath);
@@ -309,7 +278,7 @@ namespace Students.Api.CORS.RegisterStudent
                 {
                     application.ApplicationId,
                     application.ApplicationNo,
-                    application.RegistrationNo, // will be null at this stage
+                    application.RegistrationNo,
                     dto.StudentName,
                     Faculty = faculty.FacultyName
                 },

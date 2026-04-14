@@ -1,4 +1,4 @@
-﻿using LibraryService.Utility.Data.Core.Interfaces;
+using LibraryService.Utility.Data.Core.Interfaces;
 using MediatR;
 using Students.Api.DbEntities;
 using Students.Api.DTOs;
@@ -8,17 +8,20 @@ using System.Threading.Tasks;
 
 namespace Students.Api.CORS.Student
 {
-    public class GetAllStudentsQueryHandler : IRequestHandler<GetAllStudentsQuery, ResponseDto>
+    public class GetStudentsByRegistrationNoQueryHandler : IRequestHandler<GetStudentsByRegistrationNoQuery, ResponseDto>
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public GetAllStudentsQueryHandler(IUnitOfWork unitOfWork)
+        public GetStudentsByRegistrationNoQueryHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ResponseDto> Handle(GetAllStudentsQuery request, CancellationToken cancellationToken)
+        public async Task<ResponseDto> Handle(GetStudentsByRegistrationNoQuery request, CancellationToken cancellationToken)
         {
+            if (string.IsNullOrWhiteSpace(request.RegistrationNo))
+                return ResponseDto.Fail("RegistrationNo is required.");
+
             var appRepo = _unitOfWork.Repository<StudentApplication>();
             var genderRepo = _unitOfWork.Repository<Gender>();
             var classRepo = _unitOfWork.Repository<ClassMaster>();
@@ -32,7 +35,11 @@ namespace Students.Api.CORS.Student
             var genderLookup = genders.ToDictionary(g => g.GenderId, g => g.GenderName ?? string.Empty);
             var classLookup = classes.ToDictionary(c => c.Id, c => c.Name ?? string.Empty);
 
+            var filterValue = request.RegistrationNo.Trim();
+
             var list = applications
+                .Where(a => !string.IsNullOrWhiteSpace(a.RegistrationNo) &&
+                            a.RegistrationNo.Contains(filterValue, System.StringComparison.OrdinalIgnoreCase))
                 .Select(a => new StudentListDto
                 {
                     ApplicationId = a.ApplicationId,

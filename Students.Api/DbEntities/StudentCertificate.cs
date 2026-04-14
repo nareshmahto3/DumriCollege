@@ -21,6 +21,14 @@ public partial class StudentCertificate
 
     public DateTime? CreatedDate { get; set; }
 
+    public int? CreatedBy { get; set; }
+
+    public DateTime? ModifiedDate { get; set; }
+
+    public int? ModifiedBy { get; set; }
+
+    public bool IsActive { get; set; }
+
     public virtual StudentApplication? Application { get; set; }
 
     public virtual ICollection<StudentDocumentVerification> StudentDocumentVerifications { get; set; } = new List<StudentDocumentVerification>();
