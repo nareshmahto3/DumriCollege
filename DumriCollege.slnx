@@ -2,6 +2,7 @@
   <Project Path="Admission.Api/Admission.Api.csproj" />
   <Project Path="ApiGateway/ApiGateway.csproj" />
   <Project Path="LibraryService.Utility.Data.Core/LibraryService.Utility.Data.Core.csproj" />
+  <Project Path="Login.Api/Login.Api.csproj" />
   <Project Path="Student.Api/Student.Api.csproj" />
   <Project Path="FeeCollection/FeeCollection.csproj" Id="95488e5d-406d-411f-ac7e-6b2768db5ab1" />
   <Project Path="Students.Api/Students.Api.csproj" />
